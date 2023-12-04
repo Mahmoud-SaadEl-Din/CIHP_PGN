@@ -2,6 +2,7 @@ from __future__ import print_function
 import argparse
 from datetime import datetime
 import os
+from os.path import join
 import sys
 import time
 import scipy.misc
@@ -31,12 +32,12 @@ argp.add_argument('-o',
 
 args = argp.parse_args()
 
-image_list_inp = []
-for i in glob(os.path.join(args.directory, '**'), recursive=True):
-    if os.path.isfile(i):
-        image_list_inp.append(i)
-# print(image_list)
-image_list_inp = image_list_inp[:5]
+base = "/root/diffusion_root/TestSet_LC/image"
+image_list_inp = os.listdir(base)
+for i in range(len(image_list_inp)):
+	image_list_inp[i] = join(base, image_list_inp[i])
+print(image_list_inp)
+# image_list_inp = image_list_inp[:5]
 # sys.exit(2)
 N_CLASSES = 20
 NUM_STEPS = len(image_list_inp)
@@ -54,6 +55,8 @@ def main():
         image = reader.image
         image_rev = tf.reverse(image, tf.stack([1]))
         image_list = reader.image_list
+
+    out_dir = "/root/diffusion_root/TestSet_LC/image-parse-v3"
 
     image_batch = tf.stack([image, image_rev])
     h_orig, w_orig = tf.to_float(tf.shape(image_batch)[1]), tf.to_float(tf.shape(image_batch)[2])
@@ -194,22 +197,27 @@ def main():
     if not os.path.exists(edge_dir):
         os.makedirs(edge_dir)
     # Iterate over training steps.
+    print("before start", NUM_STEPS)
     for step in range(NUM_STEPS):
         # if step > 100:
         #     break
-        print(step)
+        print("Started",step)
         parsing_, scores, edge_ = sess.run([pred_all, pred_scores, pred_edge])
         if step % 1 == 0:
             print('step {:d}'.format(step))
             print (image_list[step])
         img_split = image_list[step].split('/')
         img_id = img_split[-1][:-4]
-        
+
+        t =parsing_[0, :, :, 0]
+        with open('{}/{}_vis2.npy'.format(out_dir, img_id), 'wb') as f:
+            np.save(f, t)
         msk = decode_labels(parsing_, num_classes=N_CLASSES)
 
         parsing_im = Image.fromarray(msk[0])
         # print("here")
-        parsing_im.save('{}/{}_vis.png'.format(parsing_dir, img_id))
+        parsing_im = parsing_im.convert('P')
+        parsing_im.save('{}/{}_vis.png'.format(out_dir, img_id))
         cv2.imwrite('{}/{}.png'.format(parsing_dir, img_id), parsing_[0,:,:,0])
         # sio.savemat('{}/{}.mat'.format(parsing_dir, img_id), {'data': scores[0,:,:]})
         
@@ -233,4 +241,4 @@ if __name__ == '__main__':
     main()
 
 
-##############################################################333
+#################################################################

@@ -1,0 +1,4 @@
+using "human_parser" conda env python 3.7 essential:
+-------------------------------
+python inf_png.py
+change input/output path at lines : 35, 59 respectively

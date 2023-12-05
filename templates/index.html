@@ -1,13 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Image Upload</title>
+    <title>HR-VITON</title>
 </head>
 <body>
-    <h1>Image Upload</h1>
-    <form action="/upload" method="post" enctype="multipart/form-data">
+
+    <h1>Person Upload</h1>
+    <form action="/upload_person" method="post" enctype="multipart/form-data">
         <input type="file" name="file[]" multiple>
-        <input type="submit" value="Upload">
+        <input type="submit" value="Upload_person">
     </form>
+    <h1>Cloth Upload</h1>
+    <form action="/upload_cloth" method="post" enctype="multipart/form-data">
+        <input type="file" name="file[]" multiple>
+        <input type="submit" value="Upload_cloth">
+    </form>
+    
+    <div class="pattern">
+        <button onclick="loadContent(1)">Button 1</button>
+        <div id="content1"></div>
+        <img id="image1" style="display: none;" src="" alt="Image 1">
+    </div>
+    
+    <div class="pattern">
+        <button onclick="loadContent(2)">Button 2</button>
+        <div id="content2"></div>
+        <img id="image2" style="display: none;" src="" alt="Image 2">
+    </div>
+    <div class="pattern">
+        <button onclick="loadContent(3)">Button 3</button>
+        <div id="content3"></div>
+        <img id="image3" style="display: none;" src="" alt="Image 3">
+    </div>
+    <div class="pattern">
+        <button onclick="loadContent(4)">Button 4</button>
+        <div id="content4"></div>
+        <img id="image4" style="display: none;" src="" alt="Image 4">
+    </div>
+    <div class="pattern">
+        <button onclick="loadContent(5)">Button 5</button>
+        <div id="content5"></div>
+        <img id="image5" style="display: none;" src="" alt="Image 5">
+    </div>
+    <div class="pattern">
+        <button onclick="loadContent(6)">Button 6</button>
+        <div id="content6"></div>
+        <img id="image6" style="display: none;" src="" alt="Image 6">
+    </div>
+    <div class="pattern">
+        <button onclick="loadContent(7)">Button 7</button>
+        <div id="content7"></div>
+        <img id="image7" style="display: none;" src="" alt="Image 7">
+    </div>
+
+    <script>
+        function loadContent(buttonNumber) {
+            fetch(`/route_for_button_${buttonNumber}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById(`content${buttonNumber}`).innerText = data.text;
+                    document.getElementById(`image${buttonNumber}`).src = data.image;
+                    document.getElementById(`image${buttonNumber}`).style.display = 'block';
+                });
+        }
+    </script>
 </body>
 </html>

@@ -32,19 +32,20 @@ argp.add_argument('-o',
 
 args = argp.parse_args()
 
-base = "/root/diffusion_root/TestSet_LC/image"
-image_list_inp = os.listdir(base)
-for i in range(len(image_list_inp)):
-	image_list_inp[i] = join(base, image_list_inp[i])
-print(image_list_inp)
-# image_list_inp = image_list_inp[:5]
-# sys.exit(2)
-N_CLASSES = 20
-NUM_STEPS = len(image_list_inp)
-RESTORE_FROM = './checkpoint/CIHP_pgn'
 
 
-def main():
+
+def infere_parser(in_path, out_):
+    base = in_path
+    image_list_inp = []
+    for img in os.listdir(base):
+        image_list_inp.append(join(base, img))
+    print(image_list_inp)
+    # image_list_inp = image_list_inp[:5]
+    # sys.exit(2)
+    N_CLASSES = 20
+    NUM_STEPS = len(image_list_inp)
+    RESTORE_FROM = './checkpoint/CIHP_pgn'
     """Create the model and start the evaluation process."""
     # Create queue coordinator.
     coord = tf.train.Coordinator()
@@ -56,7 +57,7 @@ def main():
         image_rev = tf.reverse(image, tf.stack([1]))
         image_list = reader.image_list
 
-    out_dir = "/root/diffusion_root/TestSet_LC/image-parse-v3"
+    out_dir = out_#"/root/diffusion_root/TestSet_LC/image-parse-v3"
 
     image_batch = tf.stack([image, image_rev])
     h_orig, w_orig = tf.to_float(tf.shape(image_batch)[1]), tf.to_float(tf.shape(image_batch)[2])
@@ -197,6 +198,7 @@ def main():
     if not os.path.exists(edge_dir):
         os.makedirs(edge_dir)
     # Iterate over training steps.
+    img_id = ""
     print("before start", NUM_STEPS)
     for step in range(NUM_STEPS):
         # if step > 100:
@@ -234,11 +236,12 @@ def main():
 
     coord.request_stop()
     coord.join(threads)
+    return '{}/{}_vis.png'.format(out_dir, img_id)
     
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
 
 
 #################################################################

@@ -2,4 +2,6 @@ checkpoint/
 output/
 logs/
 model/
+datalake/
+datasets/
 *.pyc

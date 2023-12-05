@@ -19,7 +19,7 @@ def allowed_file(filename):
 	
 @app.route('/')
 def upload_form():
-	return render_template('upload.html')
+	return render_template('index.html')
 
 @app.route('/', methods=['POST'])
 def upload_image():
@@ -46,4 +46,4 @@ def display_image(filename):
 	return redirect(url_for('static', filename='uploads/' + filename), code=301)
 
 if __name__ == "__main__":
-    app.run(debug=True,port=8000)
+    app.run(debug=True,host='0.0.0.0',port=5000)

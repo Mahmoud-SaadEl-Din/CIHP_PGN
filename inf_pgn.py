@@ -236,7 +236,7 @@ def infere_parser(in_path, out_):
 
     coord.request_stop()
     coord.join(threads)
-    return '{}/{}_vis.png'.format(out_dir, img_id)
+    return '{}/{}_vis.png'.format("./datalake/image-parse-v3", img_id)
     
 
 

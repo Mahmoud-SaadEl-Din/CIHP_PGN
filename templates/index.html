@@ -2,55 +2,84 @@
 <html>
 <head>
     <title>HR-VITON</title>
+    <style>
+        .patterns-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px; /* Adjust as needed */
+        }
+
+        .pattern {
+            width: 200px; /* Adjust width as needed */
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+
+        /* Additional CSS styling as needed */
+    </style>
 </head>
 <body>
+    <div class="patterns-container">
+        <div class="pattern">
+            <h3>Person Upload</h3>
+            <form id="uploadForm_person" enctype="multipart/form-data">
+                <input type="file" id="fileInput_p" multiple>
+                <input type="button" value="Upload_person" onclick="uploadImage()">
+                <div id="message_p"></div>
+                <img id="image_person" style="display: none;" src="" alt="Image_person">
+            </form>
+        </div>
 
-    <h1>Person Upload</h1>
-    <form action="/upload_person" method="post" enctype="multipart/form-data">
-        <input type="file" name="file[]" multiple>
-        <input type="submit" value="Upload_person">
-    </form>
-    <h1>Cloth Upload</h1>
-    <form action="/upload_cloth" method="post" enctype="multipart/form-data">
-        <input type="file" name="file[]" multiple>
-        <input type="submit" value="Upload_cloth">
-    </form>
-    
-    <div class="pattern">
-        <button onclick="loadContent(1)">Button 1</button>
-        <div id="content1"></div>
-        <img id="image1" style="display: none;" src="" alt="Image 1">
+        <div class="pattern">
+            <h3>Cloth Upload</h3>
+            <form id="uploadForm_coth" enctype="multipart/form-data">
+                <input type="file" id="fileInput_c" multiple>
+                <input type="button" value="Upload_cloth" onclick="uploadCloth()">
+                <div id="message_c"></div>
+                <img id="image_cloth" style="display: none;" src="" alt="Image_cloth">
+            </form>
+        </div>
     </div>
     
-    <div class="pattern">
-        <button onclick="loadContent(2)">Button 2</button>
-        <div id="content2"></div>
-        <img id="image2" style="display: none;" src="" alt="Image 2">
-    </div>
-    <div class="pattern">
-        <button onclick="loadContent(3)">Button 3</button>
-        <div id="content3"></div>
-        <img id="image3" style="display: none;" src="" alt="Image 3">
-    </div>
-    <div class="pattern">
-        <button onclick="loadContent(4)">Button 4</button>
-        <div id="content4"></div>
-        <img id="image4" style="display: none;" src="" alt="Image 4">
-    </div>
-    <div class="pattern">
-        <button onclick="loadContent(5)">Button 5</button>
-        <div id="content5"></div>
-        <img id="image5" style="display: none;" src="" alt="Image 5">
-    </div>
-    <div class="pattern">
-        <button onclick="loadContent(6)">Button 6</button>
-        <div id="content6"></div>
-        <img id="image6" style="display: none;" src="" alt="Image 6">
-    </div>
-    <div class="pattern">
-        <button onclick="loadContent(7)">Button 7</button>
-        <div id="content7"></div>
-        <img id="image7" style="display: none;" src="" alt="Image 7">
+
+    <div class="patterns-container">
+        <div class="pattern">
+            <button onclick="loadContent(1)">generate parse Human</button>
+            <div id="content1"></div>
+            <img id="image1" style="display: none;" src="" alt="Image 1">
+        </div>
+        
+        <div class="pattern">
+            <button onclick="loadContent(2)">parse_agonstic</button>
+            <div id="content2"></div>
+            <img id="image2" style="display: none;" src="" alt="Image 2">
+        </div>
+        <div class="pattern">
+            <button onclick="loadContent(3)">Human_agnostic</button>
+            <div id="content3"></div>
+            <img id="image3" style="display: none;" src="" alt="Image 3">
+        </div>
+        <div class="pattern">
+            <button onclick="loadContent(4)">generate human skeleton</button>
+            <div id="content4"></div>
+            <img id="image4" style="display: none;" src="" alt="Image 4">
+        </div>
+        <div class="pattern">
+            <button onclick="loadContent(5)">generate dense pose</button>  
+            <div id="content5"></div>
+            <img id="image5" style="display: none;" src="" alt="Image 5">
+        </div>
+        <div class="pattern">
+            <button onclick="loadContent(6)">generate cloth mask</button>
+            <div id="content6"></div>
+            <img id="image6" style="display: none;" src="" alt="Image 6">
+        </div>
+        <div class="pattern">
+            <button onclick="loadContent(7)">Try on pair the unpair</button>
+            <div id="content7"></div>
+            <img id="image7" style="display: none;" src="" alt="Image 7">
+        </div>
     </div>
 
     <script>
@@ -62,6 +91,50 @@
                     document.getElementById(`image${buttonNumber}`).src = data.image;
                     document.getElementById(`image${buttonNumber}`).style.display = 'block';
                 });
+        }
+
+        function uploadImage() {
+            let formData = new FormData();
+            let fileInput = document.getElementById('fileInput_p');
+            formData.append('file_p', fileInput.files[0]);
+
+            fetch('/upload_person', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display a message or perform actions upon successful upload
+                document.getElementById('message_p').innerText = data.text;
+                document.getElementById('image_person').src = data.image;
+                document.getElementById('image_person').style.display = 'block'
+            })
+            .catch(error => {
+                // Handle errors if the upload fails
+                console.error('Error:', error);
+            });
+        }
+
+        function uploadCloth() {
+            let formData = new FormData();
+            let fileInput = document.getElementById('fileInput_c');
+            formData.append('file_c', fileInput.files[0]);
+
+            fetch('/upload_cloth', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display a message or perform actions upon successful upload
+                document.getElementById('message_c').innerText = data.text;
+                document.getElementById('image_cloth').src = data.image;
+                document.getElementById('image_cloth').style.display = 'block'
+            })
+            .catch(error => {
+                // Handle errors if the upload fails
+                console.error('Error:', error);
+            });
         }
     </script>
 </body>

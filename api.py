@@ -1,18 +1,55 @@
 import os
 from flask import Flask, flash, request, redirect, url_for, render_template, jsonify
 from werkzeug.utils import secure_filename
-
+import shutil
 import cv2
 from os.path import join
 from inf_pgn import infere_parser
 import time
+from infer_cloth_mask import infere_cloth_mask
+from get_parse_agnostic import get_im_parse_agnostic_original, get_img_agnostic_human, read_pose_parse
+import numpy as np
+from PIL import Image
 app = Flask(__name__)
+
 
 app.secret_key = "secret key"
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # for many images
 
 
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+
+
+def image_resize(image, width = None, height = None, inter = cv2.INTER_AREA):
+    # initialize the dimensions of the image to be resized and
+    # grab the image size
+    dim = None
+    (h, w) = image.shape[:2]
+
+    # if both the width and height are None, then return the
+    # original image
+    if width is None and height is None:
+        return image
+
+    # check to see if the width is None
+    if width is None:
+        # calculate the ratio of the height and construct the
+        # dimensions
+        r = height / float(h)
+        dim = (int(w * r), height)
+
+    # otherwise, the height is None
+    else:
+        # calculate the ratio of the width and construct the
+        # dimensions
+        r = width / float(w)
+        dim = (width, int(h * r))
+
+    # resize the image
+    resized = cv2.resize(image, dim, interpolation = inter)
+
+    # return the resized image
+    return resized
 
 
 def allowed_file(filename):
@@ -49,92 +86,167 @@ def upload_image():
 def route_for_button_1():
     # Fetch data for button 1 (replace this with your logic)
     start = time.time()
-    img_path = infere_parser("/root/diffusion_root/CIHP_PGN/datalake/image","/root/diffusion_root/CIHP_PGN/datalake/image-parse-v3")
+    img_path = infere_parser("datalake/image","datalake/image-parse-v3")
     end = time.time()
+    parse_location = f"static/images/hmp_{img_path.split('/')[-1]}"
+    shutil.copy(img_path, parse_location)
+    cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
     data = {
-        "text": f"processed in {(end-start)/ 60} mintues",
-        "image": img_path
+        "text": f"processed in {round(((end-start)/ 60),2)} mintues",
+        "image": parse_location
     }
+    print(data)
     return jsonify(data)
 
 @app.route('/route_for_button_2')
 def route_for_button_2():
-    # Fetch data for button 2 (replace this with your logic)
+    # Fetch data for button 1 (replace this with your logic)
+    start = time.time()
+    f = open("name.txt", "r")
+    im_name = f.read()
+    print(im_name)
+    im_parse, im_parse_np, pose_data, parse_name, parse_name_npy = read_pose_parse("datalake",im_name)
+    agnostic,agnostic_mask = get_im_parse_agnostic_original(im_parse, im_parse_np, pose_data)
+    out_path = join("datalake","image-parse-agnostic-v3.2", parse_name)
+    agnostic.save(out_path)
+
+    with open(join("datalake","image-parse-agnostic-v3.2", parse_name_npy), 'wb') as f:
+        np.save(f, agnostic_mask)
+        
+    end = time.time()
+    parse_location = f"static/images/agp_{im_name}"
+    shutil.copy(out_path, parse_location)
+    cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
     data = {
-        "text": "Text for Button 2",
-        "image": "path_to_image/image2.jpg"
+        "text": f"processed in {round(((end-start)/ 60),2)} mintues",
+        "image": parse_location
     }
     return jsonify(data)
 
 @app.route('/route_for_button_3')
 def route_for_button_3():
-    # Fetch data for button 3 (replace this with your logic)
+    # Fetch data for button 1 (replace this with your logic)
+    start = time.time()
+    f = open("name.txt", "r")
+    im_name = f.read()
+    rgb_model = Image.open(join("datalake","image", im_name))
+    im_parse, im_parse_np, pose_data, parse_name, parse_name_npy = read_pose_parse("datalake",im_name)
+    agnostic = get_img_agnostic_human(rgb_model, im_parse_np, pose_data)
+    out_path = join("datalake","agnostic-v3.2", im_name)
+    agnostic.save(out_path)
+    end = time.time()
+    parse_location = f"static/images/agh_{im_name}"
+    shutil.copy(out_path, parse_location)
+    cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
     data = {
-        "text": "Text for Button 3",
-        "image": "path_to_image/image3.jpg"
+        "text": f"processed in {round(((end-start)/ 60),2)} mintues",
+        "image": parse_location
     }
     return jsonify(data)
 
 @app.route('/route_for_button_4')
 def route_for_button_4():
-    # Fetch data for button 4 (replace this with your logic)
+    in_dir = "/root/diffusion_root/CIHP_PGN/datalake/image"
+    out_dir = "/root/diffusion_root/CIHP_PGN/datalake/openpose_img"
+    json_dir = "/root/diffusion_root/CIHP_PGN/datalake/openpose_json"
+    exe_bin_file = "/root/diffusion_root/openpose/build/examples/openpose/openpose.bin"
+    start = time.time()
+    cmd_ = f"{exe_bin_file} --image_dir {in_dir} --disable_blending --write_images {out_dir} --hand --write_json {json_dir} --display 0"
+    end = time.time()
+    success = os.system(cmd_)
     data = {
-        "text": "Text for Button 4",
-        "image": "path_to_image/image4.jpg"
-    }
+		"text": "Faild",
+		"image": ""
+	}
+    if success ==0:
+        f = open("name.txt", "r")
+        im_name = f.read()
+        parse_location = f"static/images/pose_{im_name}"
+        shutil.copy(join(out_dir,im_name), parse_location)
+        cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
+        data = {
+			"text": f"processed in {round(((end-start)/ 60),2)} mintues",
+			"image": parse_location
+		}
     return jsonify(data)
 
 @app.route('/route_for_button_5')
 def route_for_button_5():
     # Fetch data for button 5 (replace this with your logic)
     data = {
-        "text": "Text for Button 5",
+        "text": "Not implemented",
         "image": "path_to_image/image5.jpg"
     }
     return jsonify(data)
 
 @app.route('/route_for_button_6')
 def route_for_button_6():
-    # Fetch data for button 6 (replace this with your logic)
+    # Fetch data for button 1 (replace this with your logic)
+    start = time.time()
+    img_path = infere_cloth_mask("/root/diffusion_root/CIHP_PGN/datalake/cloth","/root/diffusion_root/CIHP_PGN/datalake/cloth-mask")
+    end = time.time()
+    parse_location = f"static/images/cm_{img_path.split('/')[-1]}"
+    shutil.copy(img_path, parse_location)
+    cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
     data = {
-        "text": "Text for Button 6",
-        "image": "path_to_image/image6.jpg"
+        "text": f"processed in {round(((end-start)/ 60),2)} mintues",
+        "image": parse_location
     }
+    print(data)
     return jsonify(data)
 
 @app.route('/route_for_button_7')
 def route_for_button_7():
     # Fetch data for button 7 (replace this with your logic)
     data = {
-        "text": "Text for Button 7",
+        "text": "Not implemented",
         "image": "path_to_image/image7.jpg"
     }
     return jsonify(data)
 
 # Define a route for handling image uploads
 @app.route('/upload_person', methods=['POST'])
-def upload():
-    if request.method == 'POST':
-        # Handle uploaded files here
-        uploaded_files = request.files.getlist('file[]')
-        # Process the uploaded files
-        # Example: save files to a folder
-        for file in uploaded_files:
-            file.save('uploads/image' + file.filename)
-        return 'Files uploaded successfully'
+def upload_person():
+    start = time.time()
+    # Handle the uploaded file here
+    uploaded_file = request.files['file_p']
+    img_name = uploaded_file.filename
+    uploaded_file.save(join("datalake", "image", img_name))
+    end = time.time()
+    parse_location = f"static/images/paired_{img_name}"
+    shutil.copy(join("datalake", "image", img_name), parse_location)
+    cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
+    data = {
+		"text": f"processed in {round(((end-start)/ 60),2)} mintues",
+		"image": parse_location
+	}
+    print(data)
+    os.remove("name.txt")
+    f = open("name.txt", "a")
+    f.write(img_name)
+    f.close()
+    # Return a response to the front end
+    return jsonify(data)
+        
 
 # Define a route for handling image uploads
 @app.route('/upload_cloth', methods=['POST'])
-def upload():
-    if request.method == 'POST':
-        # Handle uploaded files here
-        uploaded_files = request.files.getlist('file[]')
-        # Process the uploaded files
-        # Example: save files to a folder
-        for file in uploaded_files:
-            file.save('datalake/cloth' + file.filename)
-        return 'Files uploaded successfully'
-
+def upload_cloth():
+    start = time.time()
+    # Handle the uploaded file here
+    uploaded_file = request.files['file_c']
+    img_name = uploaded_file.filename
+    uploaded_file.save(join("datalake", "cloth", img_name))
+    end = time.time()
+    parse_location = f"static/images/unpaired_{img_name}"
+    shutil.copy(join("datalake", "cloth", img_name), parse_location)
+    cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
+    data = {
+		"text": f"processed in {round(((end-start)/ 60),2)} mintues",
+		"image": parse_location
+	}
+    # Return a response to the front end
+    return jsonify(data)
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5000)

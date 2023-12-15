@@ -45,11 +45,15 @@
 
     <div class="patterns-container">
         <div class="pattern">
-            <button onclick="loadContent(1)">generate parse Human</button>
+            <button onclick="loadContent(1)">generate parse Human, takes 2 mins</button>
             <div id="content1"></div>
             <img id="image1" style="display: none;" src="" alt="Image 1">
         </div>
-        
+        <div class="pattern">
+            <button onclick="loadContent(4)">generate human skeleton</button>
+            <div id="content4"></div>
+            <img id="image4" style="display: none;" src="" alt="Image 4">
+        </div>
         <div class="pattern">
             <button onclick="loadContent(2)">parse_agonstic</button>
             <div id="content2"></div>
@@ -59,11 +63,6 @@
             <button onclick="loadContent(3)">Human_agnostic</button>
             <div id="content3"></div>
             <img id="image3" style="display: none;" src="" alt="Image 3">
-        </div>
-        <div class="pattern">
-            <button onclick="loadContent(4)">generate human skeleton</button>
-            <div id="content4"></div>
-            <img id="image4" style="display: none;" src="" alt="Image 4">
         </div>
         <div class="pattern">
             <button onclick="loadContent(5)">generate dense pose</button>  
@@ -119,7 +118,6 @@
             let formData = new FormData();
             let fileInput = document.getElementById('fileInput_c');
             formData.append('file_c', fileInput.files[0]);
-
             fetch('/upload_cloth', {
                 method: 'POST',
                 body: formData

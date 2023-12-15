@@ -10,6 +10,7 @@ import scipy.io as sio
 import cv2
 import argparse
 from glob import glob
+import time
 # os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 import tensorflow as tf
@@ -214,16 +215,16 @@ def infere_parser(in_path, out_):
         t =parsing_[0, :, :, 0]
         with open('{}/{}_vis2.npy'.format(out_dir, img_id), 'wb') as f:
             np.save(f, t)
-        msk = decode_labels(parsing_, num_classes=N_CLASSES)
+        # msk = decode_labels(parsing_, num_classes=N_CLASSES)
 
-        parsing_im = Image.fromarray(msk[0])
+        # parsing_im = Image.fromarray(msk[0])
         # print("here")
-        parsing_im = parsing_im.convert('P')
-        parsing_im.save('{}/{}_vis.png'.format(out_dir, img_id))
-        cv2.imwrite('{}/{}.png'.format(parsing_dir, img_id), parsing_[0,:,:,0])
-        # sio.savemat('{}/{}.mat'.format(parsing_dir, img_id), {'data': scores[0,:,:]})
+        # parsing_im = parsing_im.convert('P')
+        # parsing_im.save('{}/{}_vis.png'.format(out_dir, img_id))
+        # cv2.imwrite('{}/{}.png'.format(parsing_dir, img_id), parsing_[0,:,:,0])
+        # # sio.savemat('{}/{}.mat'.format(parsing_dir, img_id), {'data': scores[0,:,:]})
         
-        cv2.imwrite('{}/{}.png'.format(edge_dir, img_id), edge_[0,:,:,0] * 255)
+        # cv2.imwrite('{}/{}.png'.format(edge_dir, img_id), edge_[0,:,:,0] * 255)
         print("here")
 
     # res_mIou = mIoU.eval(session=sess)
@@ -240,8 +241,11 @@ def infere_parser(in_path, out_):
     
 
 
-# if __name__ == '__main__':
-#     main()
-
+if __name__ == '__main__':
+    start = time.time()
+    in_path, out_ = "/root/diffusion_root/CIHP_PGN/datalake/image", "/root/diffusion_root/CIHP_PGN/datalake/image-parse-v3"
+    infere_parser(in_path, out_)
+    end = time.time()
+    print(f"time taken {round((end-start)/ 60,2)} minutes")
 
 #################################################################

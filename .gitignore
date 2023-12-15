@@ -6,3 +6,7 @@ datalake/
 datasets/
 static/
 *.pyc
+openpose/
+eval_models/
+densepose_rcnn_R_50_FPN_s1x.pkl
+cmake-3.13.0-Linux-x86_64.tar.gz

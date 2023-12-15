@@ -110,12 +110,14 @@ def read_pose_parse(root_path, im_name):
     pose_name = im_name.replace(ext, '_keypoints.json')
 
     pose_data = None
-    with open(osp.join(root_path,"openpose_json",pose_name), 'r') as f:
-        pose_label = json.load(f)
-        pose_data = pose_label['people'][0]['pose_keypoints_2d']
-        pose_data = np.array(pose_data)
-        pose_data = pose_data.reshape((-1, 3))[:, :2]
-    
+    try:
+        with open(osp.join(root_path,"openpose_json",pose_name), 'r') as f:
+            pose_label = json.load(f)
+            pose_data = pose_label['people'][0]['pose_keypoints_2d']
+            pose_data = np.array(pose_data)
+            pose_data = pose_data.reshape((-1, 3))[:, :2]
+    except:
+        return False,False,False,False,False
      
 
     # load parsing image

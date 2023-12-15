@@ -1,0 +1,6 @@
+apt install libboost-all-dev
+apt install protobuf-compiler libgoogle-glog-dev
+apt install libboost-all-dev libhdf5-dev libatlas-base-dev
+gdown --no-check-certificate --folder https://drive.google.com/drive/u/1/folders/1ShQkUfZVj_nmFinF8rD1bZktySwEQ1bP
+cmake -DPYBIND11_INSTALL=ON -DUSE_PYTHON_INCLUDE_DIR=ON -DGPU_MODE=CPU_ONLY -DUSE_CUDNN=OFF -DBUILD_PYTHON=ON ..
+make -j`nproc`

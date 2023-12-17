@@ -58,11 +58,11 @@ context = {
 visualizer = context["visualizer"]
 extractor = context["extractor"]
 
-captura = cv2.VideoCapture(0)
-
-
 def predict(img):
+    import time
+    s = time.time()
     outputs = predictor(img)['instances']
+    print(f"finished in {time.time() - s}")
     image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     image = np.tile(image[:, :, np.newaxis], [1, 1, 3])
     data = extractor(outputs)
@@ -72,15 +72,6 @@ def predict(img):
 def infer_densepose(in_, out_):
     input_dir = in_
     output_dir = out_
-    
-
     for image in os.listdir(input_dir):
         frame = cv2.imread(join(input_dir, image))
-        _ = predict(frame)
-        # to_be_saved = join("Pure_mask.png")
         cv2.imwrite(join(output_dir,image), predict(frame))
-
-
-
-    captura.release()
-    cv2.destroyAllWindows()

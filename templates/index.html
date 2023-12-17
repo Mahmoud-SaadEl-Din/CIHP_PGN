@@ -40,6 +40,12 @@
                 <img id="image_cloth" style="display: none;" src="" alt="Image_cloth">
             </form>
         </div>
+        <div class="pattern">
+            <button onclick="loadContent(8)">Automate pipeline</button>
+            <div id="content8"></div>
+            <img id="image8" style="display: none;" src="" alt="Image 8">
+        </div>
+
     </div>
     
 
@@ -91,6 +97,15 @@
                     document.getElementById(`image${buttonNumber}`).style.display = 'block';
                 });
         }
+
+        function sequentialFunction() {
+            for (let i = 1; i <= 7; i++) {
+                setTimeout(() => {
+                    loadContent(i);
+                }, i * 1000); // Adjust the delay as needed (e.g., i * 1000 for 1 second delay)
+            }
+        }
+
 
         function uploadImage() {
             let formData = new FormData();

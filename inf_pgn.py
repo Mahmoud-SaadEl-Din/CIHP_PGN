@@ -38,15 +38,6 @@ argp.add_argument('-o',
 
 args = argp.parse_args()
 
-
-# Set up tf session and initialize variables. 
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
-sess = tf.Session(config=config)
-init = tf.global_variables_initializer()
-sess.run(init)
-sess.run(tf.local_variables_initializer())
-
 def infere_parser(in_path, out_):
     start = time.time()
     base = in_path
@@ -110,6 +101,12 @@ def infere_parser(in_path, out_):
 
     start2 = time.time()
     # Which variables to load.
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    sess = tf.Session(config=config)
+    init = tf.global_variables_initializer()
+    sess.run(init)
+    sess.run(tf.local_variables_initializer())
     restore_var = tf.global_variables()
     # Load weights.
     RESTORE_FROM = './checkpoint/CIHP_pgn'
@@ -154,11 +151,11 @@ def infere_parser(in_path, out_):
     
 
 
-if __name__ == '__main__':
-    start = time.time()
-    in_path, out_ = "/root/diffusion_root/CIHP_PGN/datalake/image", "/root/diffusion_root/CIHP_PGN/datalake/image-parse-v3"
-    infere_parser(in_path, out_)
-    end = time.time()
-    print(f"time taken {round((end-start)/ 60,2)} minutes")
+# if __name__ == '__main__':
+#     start = time.time()
+#     in_path, out_ = "/root/diffusion_root/CIHP_PGN/datalake/image", "/root/diffusion_root/CIHP_PGN/datalake/image-parse-v3"
+#     infere_parser(in_path, out_)
+#     end = time.time()
+#     print(f"time taken {round((end-start)/ 60,2)} minutes")
 
 #################################################################

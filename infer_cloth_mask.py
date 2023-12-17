@@ -9,27 +9,28 @@ from carvekit.pipelines.preprocessing import PreprocessingStub
 from carvekit.trimap.generator import TrimapGenerator
 
 
+# Check doc strings for more information
+seg_net = TracerUniversalB7(device='cpu',
+            batch_size=1)
 
-def infere_cloth_mask(root, out):
-    # Check doc strings for more information
-    seg_net = TracerUniversalB7(device='cpu',
+fba = FBAMatting(device='cpu',
+                input_tensor_size=100,
                 batch_size=1)
 
-    fba = FBAMatting(device='cpu',
-                    input_tensor_size=2048,
-                    batch_size=1)
+trimap = TrimapGenerator()
 
-    trimap = TrimapGenerator()
+preprocessing = PreprocessingStub()
 
-    preprocessing = PreprocessingStub()
+postprocessing = MattingMethod(matting_module=fba,
+                            trimap_generator=trimap,
+                            device='cpu')
 
-    postprocessing = MattingMethod(matting_module=fba,
-                                trimap_generator=trimap,
-                                device='cpu')
+interface = Interface(pre_pipe=preprocessing,
+                    post_pipe=postprocessing,
+                    seg_pipe=seg_net)
 
-    interface = Interface(pre_pipe=preprocessing,
-                        post_pipe=postprocessing,
-                        seg_pipe=seg_net)
+
+def infere_cloth_mask(root, out):
 
     imgs = []
     for name in os.listdir(root):
@@ -41,7 +42,7 @@ def infere_cloth_mask(root, out):
         if idx[0][0] == False:
             idx = (image[...,0]==0)&(image[...,1]==0)&(image[...,2]==0) # background 0 or 130, just try it
         return idx
-
+    
     images = interface(imgs)
     for i, im in enumerate(images):
         img = np.array(im)

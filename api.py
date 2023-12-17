@@ -4,9 +4,9 @@ from werkzeug.utils import secure_filename
 import shutil
 import cv2
 from os.path import join
-from inf_pgn import infere_parser
+from inf_pgn import *
 import time
-from infer_cloth_mask import infere_cloth_mask
+from infer_cloth_mask import *
 from get_parse_agnostic import get_im_parse_agnostic_original, get_img_agnostic_human, read_pose_parse
 import numpy as np
 from PIL import Image
@@ -96,7 +96,7 @@ def route_for_button_1():
     shutil.copy(img_path, parse_location)
     cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
     data = {
-        "text": f"processed in {round(((end-start)/ 60),2)} mintues",
+        "text": f"processed in {round((end-start),2)} seconds",
         "image": parse_location
     }
     print(data)
@@ -128,7 +128,7 @@ def route_for_button_2():
     shutil.copy(out_path, parse_location)
     cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
     data = {
-        "text": f"processed in {round(((end-start)/ 60),2)} mintues",
+        "text": f"processed in {round((end-start),2)} seconds",
         "image": parse_location
     }
     return jsonify(data)
@@ -155,7 +155,7 @@ def route_for_button_3():
     shutil.copy(out_path, parse_location)
     cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
     data = {
-        "text": f"processed in {round(((end-start)/ 60),2)} mintues",
+        "text": f"processed in {round((end-start),2)} seconds",
         "image": parse_location
     }
     return jsonify(data)
@@ -185,7 +185,7 @@ def route_for_button_4():
         shutil.copy(join(out_dir,im_name_datalake), parse_location)
         cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
         data = {
-			"text": f"processed in {round(((end-start)/ 60),2)} mintues",
+			"text": f"processed in {round((end-start),2)} seconds",
 			"image": parse_location
 		}
     return jsonify(data)
@@ -202,7 +202,7 @@ def route_for_button_5():
     shutil.copy(join("datalake","image-densepose", im_name), parse_location)
     cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
     data = {
-        "text": f"processed in {round(((end-start)/ 60),2)} mintues",
+        "text": f"processed in {round((end-start),2)} seconds",
         "image": parse_location
     }
     print(data)
@@ -218,7 +218,7 @@ def route_for_button_6():
     shutil.copy(img_path, parse_location)
     cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
     data = {
-        "text": f"processed in {round(((end-start)/ 60),2)} mintues",
+        "text": f"processed in {round((end-start),2)} seconds",
         "image": parse_location
     }
     print(data)
@@ -237,8 +237,28 @@ def route_for_button_7():
     shutil.copy(join(out_path, im_name), parse_location)
     cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
     data = {
-        "text": f"processed in {round(((end-start)/ 60),2)} mintues",
+        "text": f"processed in {round((end-start),2)} seconds",
         "image": parse_location
+    }
+    print(data)
+    return jsonify(data)
+
+@app.route('/route_for_button_8')
+def route_for_button_8():
+    # Fetch data for button 1 (replace this with your logic)
+    start = time.time()
+    route_for_button_1()
+    route_for_button_4()
+    route_for_button_2()
+    route_for_button_3()
+    route_for_button_5()
+    route_for_button_6()
+    route_for_button_7()
+    end = time.time()
+
+    data = {
+        "text": f"processed in {round((end-start),2)} seconds"
+
     }
     print(data)
     return jsonify(data)
@@ -265,7 +285,7 @@ def upload_person():
     shutil.copy(join("datalake", "image", img_name), parse_location)
     cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
     data = {
-		"text": f"processed in {round(((end-start)/ 60),2)} mintues",
+		"text": f"processed in {round((end-start),2)} seconds",
 		"image": parse_location
 	}
     print(data)
@@ -305,7 +325,7 @@ def upload_cloth():
     shutil.copy(join("datalake", "cloth", img_name), parse_location)
     cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
     data = {
-		"text": f"processed in {round(((end-start)/ 60),2)} mintues",
+		"text": f"processed in {round((end-start),2)} seconds",
 		"image": parse_location
 	}
     # Return a response to the front end

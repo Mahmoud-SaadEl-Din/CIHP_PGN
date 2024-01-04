@@ -88,24 +88,28 @@
     </div>
 
     <script>
-        function loadContent(buttonNumber) {
-            fetch(`/route_for_button_${buttonNumber}`)
+        function processResponse(buttonNumber, serverUrl) {
+            fetch(serverUrl)
                 .then(response => response.json())
                 .then(data => {
+                    console.log('Received data:', data); 
                     document.getElementById(`content${buttonNumber}`).innerText = data.text;
                     document.getElementById(`image${buttonNumber}`).src = data.image;
                     document.getElementById(`image${buttonNumber}`).style.display = 'block';
+                })
+                .catch(error => {
+                   console.error('Fetch error:', error); // Log fetch errors
                 });
         }
 
-        function sequentialFunction() {
-            for (let i = 1; i <= 7; i++) {
-                setTimeout(() => {
-                    loadContent(i);
-                }, i * 1000); // Adjust the delay as needed (e.g., i * 1000 for 1 second delay)
-            }
+        function loadContent(buttonNumber) {
+            // if (buttonNumber === 10 || buttonNumber === 7) {
+            //     processResponse(buttonNumber, `http://62.67.51.161:5000/route_for_button_${buttonNumber}`);
+            // } else {
+            //     processResponse(buttonNumber, `/route_for_button_${buttonNumber}`);
+            // }
+            processResponse(buttonNumber, `/route_for_button_${buttonNumber}`);
         }
-
 
         function uploadImage() {
             let formData = new FormData();

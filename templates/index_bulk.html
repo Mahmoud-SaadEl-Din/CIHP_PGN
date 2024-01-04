@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HR-VITON</title>
+    <style>
+        .patterns-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px; /* Adjust as needed */
+        }
+
+        .pattern {
+            width: 200px; /* Adjust width as needed */
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+
+        /* Additional CSS styling as needed */
+    </style>
+</head>
+<body>
+    <div class="patterns-container">
+        <div class="pattern">
+            <h3>Person Upload</h3>
+            <form id="uploadForm_person" method="post" enctype="multipart/form-data">
+                <input type="file" id="person_images" webkitdirectory directory multiple>
+                <input type="button" value="Upload_person" onclick="uploadImage()">
+                <div id="message_p"></div>
+            </form>
+        </div>
+
+        <div class="pattern">
+            <h3>Cloth Upload</h3>
+            <form id="uploadForm_coth" method="post" enctype="multipart/form-data">
+                <input type="file" id="cloth_images" webkitdirectory directory multiple>
+                <input type="button" value="Upload_cloth" onclick="uploadCloth()">
+                <div id="message_c"></div>
+            </form>
+        </div>
+
+        <div class="pattern">
+            <button onclick="loadContent(8)">Automate pipeline</button>
+            <div id="content8"></div>
+            <img id="image8" style="display: none;" src="" alt="Image 8">
+        </div>
+
+    </div>
+    
+
+    <div class="patterns-container">
+        <div class="pattern">
+            <button onclick="loadContent(1)">generate parse Human, takes 2 mins</button>
+            <div id="content1"></div>
+            <img id="image1" style="display: none;" src="" alt="Image 1">
+        </div>
+        <div class="pattern">
+            <button onclick="loadContent(4)">generate human skeleton</button>
+            <div id="content4"></div>
+            <img id="image4" style="display: none;" src="" alt="Image 4">
+        </div>
+        <div class="pattern">
+            <button onclick="loadContent(2)">parse_agonstic</button>
+            <div id="content2"></div>
+            <img id="image2" style="display: none;" src="" alt="Image 2">
+        </div>
+        <div class="pattern">
+            <button onclick="loadContent(3)">Human_agnostic</button>
+            <div id="content3"></div>
+            <img id="image3" style="display: none;" src="" alt="Image 3">
+        </div>
+        <div class="pattern">
+            <button onclick="loadContent(5)">generate dense pose</button>  
+            <div id="content5"></div>
+            <img id="image5" style="display: none;" src="" alt="Image 5">
+        </div>
+        <div class="pattern">
+            <button onclick="loadContent(6)">generate cloth mask</button>
+            <div id="content6"></div>
+            <img id="image6" style="display: none;" src="" alt="Image 6">
+        </div>
+        <div class="pattern">
+            <button onclick="loadContent(7)">Try on pair the unpair</button>
+            <div id="content7"></div>
+            <img id="image7" style="display: none;" src="" alt="Image 7">
+        </div>
+    </div>
+
+    <script>
+        function processResponse(buttonNumber, serverUrl) {
+            fetch(serverUrl)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Received data:', data); 
+                    document.getElementById(`content${buttonNumber}`).innerText = data.text;
+                    document.getElementById(`image${buttonNumber}`).src = data.image;
+                    document.getElementById(`image${buttonNumber}`).style.display = 'block';
+                })
+                .catch(error => {
+                   console.error('Fetch error:', error); // Log fetch errors
+                });
+        }
+
+        function loadContent(buttonNumber) {
+            // if (buttonNumber === 10 || buttonNumber === 7) {
+            //     processResponse(buttonNumber, `http://62.67.51.161:5000/route_for_button_${buttonNumber}`);
+            // } else {
+            //     processResponse(buttonNumber, `/route_for_button_${buttonNumber}`);
+            // }
+            processResponse(buttonNumber, `/route_for_button_${buttonNumber}`);
+        }
+
+        function uploadImage() {
+            let formData = new FormData();
+            let fileInput = document.getElementById('person_images');
+            // Loop through all selected files and append each to the formData
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append('person_images', fileInput.files[i]);
+            }
+
+            fetch('/upload_person', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display a message or perform actions upon successful upload
+                document.getElementById('message_p').innerText = data.text;
+            })
+            .catch(error => {
+                // Handle errors if the upload fails
+                console.error('Error:', error);
+            });
+        }
+
+        function uploadCloth() {
+            let formData = new FormData();
+            let fileInput = document.getElementById('cloth_images');
+            for (let i = 0; i < fileInput.files.length; i++) {
+                formData.append('cloth_images', fileInput.files[i]);
+            }
+            fetch('/upload_cloth', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display a message or perform actions upon successful upload
+                document.getElementById('message_c').innerText = data.text;
+            })
+            .catch(error => {
+                // Handle errors if the upload fails
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

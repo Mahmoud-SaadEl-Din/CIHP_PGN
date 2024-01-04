@@ -51,6 +51,8 @@ def infere_cloth_mask(root, out):
         img = np.ones(idx.shape)*255
         img[idx] = 0
         im = Image.fromarray(np.uint8(img), 'L')
-        im.save(f'{out}/{imgs[i].split("/")[-1].split(".")[0]}.png')
+        im_name = f'{out}/{imgs[i].split("/")[-1].split(".")[0]}.png'
+        print(im_name)
+        im.save(im_name)
 
-    return f'{out}/{imgs[0].split("/")[-1].split(".")[0]}.png'
+    return len(images)

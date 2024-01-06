@@ -221,14 +221,14 @@ def eval(opt, test_loader, tocg, generator):
             for i in range(shape[0]):
                 a = output[i]
                 print("Hallo => ",type(output[i]),a.shape)
-
+                # print("Examine the inputs: ==>", inputs)
                 grid = make_image_grid([(clothes[i].cpu() / 2 + 0.5), (pre_clothes_mask[i].cpu()).expand(3, -1, -1), visualize_segmap(parse_agnostic.cpu(), batch=i), ((densepose.cpu()[i]+1)/2),
                                         (warped_cloth[i].cpu().detach() / 2 + 0.5), (warped_clothmask[i].cpu().detach()).expand(3, -1, -1), visualize_segmap(fake_parse_gauss.cpu(), batch=i),
                                         (pose_map[i].cpu()/2 +0.5), (warped_cloth[i].cpu()/2 + 0.5), (agnostic[i].cpu()/2 + 0.5),
                                         (im[i]/2 +0.5).expand(3, -1, -1), (a.cpu()/2 +0.5)],
                                         nrow=4)
-                unpaired_name = (inputs['c_name']['unpaired'][i]) # inputs['c_name']['paired'][i].split('.')[0] + '_' + inputs['c_name'][opt.datasetting][i].split('.')[0]
-                grid_name = (inputs['c_name']['unpaired'][i].split('.')[0]+ '_grid.png') # inputs['c_name']['paired'][i].split('.')[0] + '_' + inputs['c_name'][opt.datasetting][i].split('.')[0]
+                unpaired_name = (inputs["im_name"][i].split(".")[0] +"_"+ inputs['c_name']['unpaired'][i]) # inputs['c_name']['paired'][i].split('.')[0] + '_' + inputs['c_name'][opt.datasetting][i].split('.')[0]
+                grid_name = (inputs["im_name"][i].split(".")[0] +"_"+ inputs['c_name']['unpaired'][i].split('.')[0]+ '_grid.png') # inputs['c_name']['paired'][i].split('.')[0] + '_' + inputs['c_name'][opt.datasetting][i].split('.')[0]
 
                 save_image(grid, os.path.join(grid_dir, grid_name))
                 unpaired_names.append(unpaired_name)

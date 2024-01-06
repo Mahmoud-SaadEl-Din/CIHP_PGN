@@ -106,7 +106,7 @@ def save_images(img_tensors, img_names, save_dir):
             array = array.swapaxes(0, 1).swapaxes(1, 2)
 
         im = Image.fromarray(array)
-        im.save(os.path.join(save_dir, "final"+img_name), format='JPEG')
+        im.save(os.path.join(save_dir, img_name), format='JPEG')
         
         
 def create_network(cls, opt):

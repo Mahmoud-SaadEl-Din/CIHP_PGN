@@ -7,11 +7,12 @@ from os.path import join
 from inf_pgn import *
 import time
 from infer_cloth_mask import *
-from get_parse_agnostic import get_im_parse_agnostic_original, get_img_agnostic_human, read_pose_parse
+from get_parse_agnostic import get_im_parse_agnostic_original, get_img_agnostic_human, read_pose_parse, read_pose_parse_detectron2
 import numpy as np
 from PIL import Image
 from self_visualized import infer_densepose
 from test_generator import infer_hr_viton
+from keypoints_detectron2 import *
 
 
 app = Flask(__name__)
@@ -133,7 +134,7 @@ def route_for_button_2():
     out_dir = join("datalake_folder","image-parse-agnostic-v3.2")
     for im_name in os.listdir(images_dir):
         print(im_name)
-        im_parse, im_parse_np, pose_data, parse_name, parse_name_npy = read_pose_parse("datalake_folder",im_name)
+        im_parse, im_parse_np, pose_data, parse_name, parse_name_npy = read_pose_parse_detectron2("datalake_folder",im_name)
         if im_parse ==False:
             print(f"{im_name} ==> OpenPose Json file is not exist")
             continue
@@ -157,7 +158,7 @@ def route_for_button_3():
     out_dir = join("datalake_folder","agnostic-v3.2")
     for im_name in os.listdir(images_dir):
         rgb_model = Image.open(join("datalake_folder","image", im_name))
-        im_parse, im_parse_np, pose_data, parse_name, parse_name_npy = read_pose_parse("datalake_folder",im_name)
+        im_parse, im_parse_np, pose_data, parse_name, parse_name_npy = read_pose_parse_detectron2("datalake_folder",im_name)
         if im_parse ==False:
             print(f"{im_name} ==> OpenPose Json file is not exist")
             continue
@@ -176,20 +177,21 @@ def route_for_button_4():
     in_dir = "/root/diffusion_root/CIHP_PGN/datalake_folder/image"
     out_dir = "/root/diffusion_root/CIHP_PGN/datalake_folder/openpose_img"
     json_dir = "/root/diffusion_root/CIHP_PGN/datalake_folder/openpose_json"
-    exe_bin_file = "./build/examples/openpose/openpose.bin"
+    # exe_bin_file = "./build/examples/openpose/openpose.bin"
     start = time.time()
-    os.chdir("/root/diffusion_root/CIHP_PGN/openpose")
-    cmd_ = f"{exe_bin_file} --image_dir {in_dir} --disable_blending --write_images {out_dir} --hand --write_json {json_dir} --display 0 --net_resolution '64x64'"
-    success = os.system(cmd_)
+    # os.chdir("/root/diffusion_root/CIHP_PGN/openpose")
+    # cmd_ = f"{exe_bin_file} --image_dir {in_dir} --disable_blending --write_images {out_dir} --hand --write_json {json_dir} --display 0 --net_resolution '64x64'"
+    # success = os.system(cmd_)
+    pose_dir(in_dir, out_dir, json_dir)
+    end = time.time()
     data = {
-		"text": "Faild"
+		"text": f"processed {len(os.listdir(json_dir))} in {round((end-start),2)} seconds"
 	}
-    if success ==0:
-        end = time.time()
-        os.chdir("/root/diffusion_root/CIHP_PGN")
-        data = {
-			"text": f"processed {len(os.listdir(json_dir))} in {round((end-start),2)} seconds"
-		}
+    # if success ==0:
+    #     os.chdir("/root/diffusion_root/CIHP_PGN")
+    #     data = {
+	# 		"text": f"processed {len(os.listdir(json_dir))} in {round((end-start),2)} seconds"
+	# 	}
     return jsonify(data)
 
 @app.route('/route_for_button_5')

@@ -18,83 +18,141 @@
 
         /* Additional CSS styling as needed */
     </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
 </head>
 <body>
     <div class="patterns-container">
-        <div class="pattern">
-            <h3>Person Upload</h3>
-            <form id="uploadForm_person" method="post" enctype="multipart/form-data">
-                <input type="file" id="person_images" webkitdirectory directory multiple>
-                <input type="button" value="Upload_person" onclick="uploadImage()">
-                <div id="message_p"></div>
-            </form>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <form id="uploadForm_person" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="person_images" class="form-label">Select Person Images:</label>
+                            <input type="file" class="form-control" id="person_images" webkitdirectory directory multiple>
+                        </div>
+                        <div class="d-grid mb-3">
+                            <button class="btn btn-warning btn-lg" type="button" onclick="uploadImage()">Upload Person</button>
+                        </div>
+                    </form>
+                    <div class="mb-3" id="message_p"></div>
+                </div>
+                <div class="col-md-6">
+                    <form id="uploadForm_cloth" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="cloth_images" class="form-label">Select Cloth Images:</label>
+                            <input type="file" class="form-control" id="cloth_images" webkitdirectory directory multiple>
+                        </div>
+                        <div class="d-grid mb-3">
+                            <button class="btn btn-warning btn-lg" type="button" onclick="uploadCloth()">Upload Cloth</button>
+                        </div>
+                    </form>
+                    <div class="mb-3" id="message_c"></div>
+                    <div class="d-grid mb-3">
+                        <button class="btn btn-danger btn-lg" id="startTrialButton" style="display: none;" type="button" onclick="Refresh()">Start new trial</button>
+                    </div>
+                </div>
+            </div>
         </div>
+        
 
-        <div class="pattern">
-            <h3>Cloth Upload</h3>
-            <form id="uploadForm_coth" method="post" enctype="multipart/form-data">
-                <input type="file" id="cloth_images" webkitdirectory directory multiple>
-                <input type="button" value="Upload_cloth" onclick="uploadCloth()">
-                <div id="message_c"></div>
-            </form>
-        </div>
-
-        <div class="pattern">
-            <button onclick="loadContent(8)">Automate pipeline</button>
+        <!-- <div class="pattern">
+            <button class="btn btn-warning" onclick="loadContent(8)">Automate pipeline</button>
             <div id="content8"></div>
             <img id="image8" style="display: none;" src="" alt="Image 8">
-        </div>
+        </div> -->
 
     </div>
     
 
-    <div class="patterns-container">
-        <div class="pattern">
-            <button onclick="loadContent(1)">generate parse Human, takes 2 mins</button>
-            <div id="content1"></div>
-            <img id="image1" style="display: none;" src="" alt="Image 1">
+    <div class="container">
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="mb-3">
+                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(1)">Step (1): Person Parsing Segmentation</button>
+                <div id="content1"></div>
+            </div>
         </div>
-        <div class="pattern">
-            <button onclick="loadContent(4)">generate human skeleton</button>
-            <div id="content4"></div>
-            <img id="image4" style="display: none;" src="" alt="Image 4">
+        <div class="col">
+            <div class="mb-3">
+                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(4)">Step (2): Person Pose & Keypoints</button>
+                <div id="content4"></div>
+            </div>
         </div>
-        <div class="pattern">
-            <button onclick="loadContent(2)">parse_agonstic</button>
-            <div id="content2"></div>
-            <img id="image2" style="display: none;" src="" alt="Image 2">
+        <div class="col">
+            <div class="mb-3">
+                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(2)">Step (3): Parsing Segmentation Agnostic </button>
+                <div id="content2"></div>
+            </div>
         </div>
-        <div class="pattern">
-            <button onclick="loadContent(3)">Human_agnostic</button>
-            <div id="content3"></div>
-            <img id="image3" style="display: none;" src="" alt="Image 3">
+        <div class="col">
+            <div class="mb-3">
+                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(3)">Step (4): Person Agnostic</button>
+                <div id="content3"></div>
+            </div>
         </div>
-        <div class="pattern">
-            <button onclick="loadContent(5)">generate dense pose</button>  
-            <div id="content5"></div>
-            <img id="image5" style="display: none;" src="" alt="Image 5">
+        <div class="col">
+            <div class="mb-3">
+                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(5)">Step (5): Getting Densepose</button>
+                <div id="content5"></div>
+            </div>
         </div>
-        <div class="pattern">
-            <button onclick="loadContent(6)">generate cloth mask</button>
-            <div id="content6"></div>
-            <img id="image6" style="display: none;" src="" alt="Image 6">
+        <div class="col">
+            <div class="mb-3">
+                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(6)">Step (6): Cloth Binary Masking</button>
+                <div id="content6"></div>
+            </div>
         </div>
-        <div class="pattern">
-            <button onclick="loadContent(7)">Try on pair the unpair</button>
-            <div id="content7"></div>
-            <img id="image7" style="display: none;" src="" alt="Image 7">
+        <div class="col">
+            <div class="mb-3">
+                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(7)">Final Step: TRY-ON</button>
+                <div id="content7"></div>
+            </div>
         </div>
     </div>
+</div>
+
+
+        
+        <!-- Loading indicator section -->
+        <div class="row">
+            <div class="col-md-12 text-center mt-3">
+                <div id="loading" style="display: none;">
+                    <img src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/0.16.1/images/loader-large.gif" alt="Loading...">
+                    <p>Request still processing, Kindly Wait...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+
+    <div class="container">
+        <!-- Other content -->
+    
+        <!-- Button spanning two columns -->
+        <div class="row">
+            <div class="col-md-12 text-center mt-3">
+                <button class="btn btn-success btn-lg col-md-6" onclick="showResults()">Show Results</button>
+            </div>
+        </div>
+    
+        <!-- Other content -->
+    </div>
+    
+    <div class="patterns-container" id="imageContainer"></div>
 
     <script>
         function processResponse(buttonNumber, serverUrl) {
+            document.getElementById('loading').style.display = 'block';
             fetch(serverUrl)
                 .then(response => response.json())
                 .then(data => {
+                    document.getElementById('loading').style.display = 'none';
                     console.log('Received data:', data); 
                     document.getElementById(`content${buttonNumber}`).innerText = data.text;
-                    document.getElementById(`image${buttonNumber}`).src = data.image;
-                    document.getElementById(`image${buttonNumber}`).style.display = 'block';
                 })
                 .catch(error => {
                    console.error('Fetch error:', error); // Log fetch errors
@@ -153,6 +211,47 @@
                 console.error('Error:', error);
             });
         }
+    
+        function showResults() {
+            fetch('/get_all_images') // Replace with the appropriate Flask route to retrieve image paths
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('startTrialButton').style.display = 'block';
+                    // Access the image paths from the server response
+                    const imagePaths = data.imagePaths; // Adjust according to the actual response structure
+                    
+                    const imageContainer = document.getElementById('imageContainer');
+                    
+                    // Loop through the image paths and create <img> elements to display images
+                    imagePaths.forEach(imagePath => {
+                        const img = document.createElement('img');
+                        img.src = imagePath;
+                        img.alt = 'Image';
+                        imageContainer.appendChild(img);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+
+            function Refresh() {
+            fetch('/save_Refresh') // Replace with the appropriate Flask route to retrieve image paths
+                .then(response => response.json())
+                .then(data => {
+                    // console.log("here")
+                    // Change button color and text after the request is finished
+                    const trialButton = document.getElementById('startTrialButton');
+                    trialButton.classList.remove('btn-danger'); // Remove current color class
+                    trialButton.classList.add('btn-success'); // Change to a different color class
+                    trialButton.innerText = 'Done refreshing. Will Automatically Restart';
+                    setTimeout(() => {}, 2000)
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
     </script>
 </body>
 </html>

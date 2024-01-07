@@ -1,4 +1,4 @@
-import os
+import os,datetime
 from flask import Flask, flash, request, redirect, url_for, render_template, jsonify
 from werkzeug.utils import secure_filename
 import shutil
@@ -13,7 +13,7 @@ from PIL import Image
 from self_visualized import infer_densepose
 from test_generator import infer_hr_viton
 from keypoints_detectron2 import *
-
+from flask import send_from_directory
 
 app = Flask(__name__)
 
@@ -63,6 +63,9 @@ def allowed_file(filename):
 
 import requests
 
+@app.route('/serve_images/<path:filename>')
+def serve_images(filename):
+    return send_from_directory('datasets/HR_VITON_group', filename)
 
 def send_to_diffusion2(image_path, txt):
     # URL of the GPU server where you'll upload the image
@@ -146,7 +149,7 @@ def route_for_button_2():
     
     end = time.time()
     data = {
-        "text": f"processed {len(os.listdir(out_dir)) // 2} in {round((end-start),2)} seconds"
+        "text": f"processed {len(os.listdir(out_dir)) // 2} images in {round((end-start),2)} seconds"
     }
     return jsonify(data)
 
@@ -168,7 +171,7 @@ def route_for_button_3():
        
     end = time.time()
     data = {
-        "text": f"processed {len(os.listdir(out_dir))} in {round((end-start),2)} seconds"
+        "text": f"processed {len(os.listdir(out_dir))} images in {round((end-start),2)} seconds"
     }
     return jsonify(data)
 
@@ -185,7 +188,7 @@ def route_for_button_4():
     pose_dir(in_dir, out_dir, json_dir)
     end = time.time()
     data = {
-		"text": f"processed {len(os.listdir(json_dir))} in {round((end-start),2)} seconds"
+		"text": f"processed {len(os.listdir(json_dir))} images in {round((end-start),2)} seconds"
 	}
     # if success ==0:
     #     os.chdir("/root/diffusion_root/CIHP_PGN")
@@ -203,7 +206,7 @@ def route_for_button_5():
     infer_densepose(images_dir,out_dir)
     end = time.time()
     data = {
-        "text": f"processed {len(os.listdir(out_dir))} in {round((end-start),2)} seconds"
+        "text": f"processed {len(os.listdir(out_dir))} images in {round((end-start),2)} seconds"
         }
     return jsonify(data)
 
@@ -227,7 +230,7 @@ def route_for_button_7():
     infer_hr_viton("datalake_folder",out_path,"pairs.txt")
     end = time.time()
     data = {
-        "text": f"processed in {round((end-start),2)} seconds"
+        "text": f"processed {len(os.listdir(out_path)) // 2} images in {round((end-start),2)} seconds"
     }
     print(data)
     return jsonify(data)
@@ -283,6 +286,48 @@ def route_for_button_8():
     }
     print(data)
     return jsonify(data)
+
+
+@app.route('/get_all_images')
+def get_all_images():
+    # Fetch image paths from your server or database dynamically
+    # This is just an example; replace it with your actual logic
+    print("recieved the request")
+    image_folder = 'datasets/HR_VITON_group'  # Change this to your actual image folder path
+    image_paths = [f'/serve_images/{img}' for img in os.listdir(image_folder) if "grid" in img]
+    print("recieved the request with images", image_paths)
+    return jsonify({'imagePaths': image_paths})
+
+
+
+@app.route('/save_Refresh')
+def save_Refresh():
+    # Fetch image paths from your server or database dynamically
+    # This is just an example; replace it with your actual logic
+    main_folder = "datalake_folder"
+    
+    l = ['image', 'image-parse-v3','image-parse-agnostic-v3.2', 'agnostic-v3.2', 'openpose_img', 'openpose_json','agnostic-v3.2','image-densepose']
+    for name in l:
+        shutil.rmtree(join(main_folder, name))
+        os.mkdir(join(main_folder, name))
+    l = ["cloth", "cloth-mask"]
+    for name in l:     
+        shutil.rmtree(join(main_folder, name))
+        os.mkdir(join(main_folder, name))
+    # print(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    logged_dir = join("Logged_Trails", datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
+    os.makedirs(logged_dir)
+    from distutils.dir_util import copy_tree
+    copy_tree("/root/diffusion_root/CIHP_PGN/datasets/HR_VITON_group", logged_dir)
+    l = ["HR_VITON_group"]
+    for name in l:     
+        shutil.rmtree(join("datasets", name))
+        os.mkdir(join("datasets", name))
+    if os.path.exists(join(main_folder,"pairs.txt")):
+        os.remove(join(main_folder,"pairs.txt"))
+    print("recieved the request to refresh")
+    return jsonify({'text': f'Refreshed Successfully successfully'})
+
 
 # Define a route for handling image uploads
 @app.route('/upload_person', methods=['POST'])

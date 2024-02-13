@@ -50,8 +50,11 @@
                     </form>
                     <div class="mb-3" id="message_c"></div>
                     <div class="d-grid mb-3">
-                        <button class="btn btn-danger btn-lg" id="startTrialButton" style="display: none;" type="button" onclick="Refresh()">Start new trial</button>
+                        <button class="btn btn-danger btn-lg" id="startTrialButton" style="display: none;" type="button" onclick="Refresh()">Click here after you analysis the results to SAVE it</button>
                     </div>
+                    <!-- <div class="d-grid mb-3">
+                        <button class="btn btn-danger btn-lg" id="startTrialButton_stable" style="display: none;" type="button" onclick="Refresh_stable()">Save STABLE VITON Results</button>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -111,6 +114,18 @@
                 <div id="content7"></div>
             </div>
         </div>
+        <div class="col">
+            <div class="mb-3">
+                <button class="btn btn-danger btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(8)">NEW: STABLE VITON</button>
+                <div id="content8"></div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="mb-3">
+                <button class="btn btn-danger btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(9)">Refine: STABLE VITON</button>
+                <div id="content8"></div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -138,11 +153,19 @@
                 <button class="btn btn-success btn-lg col-md-6" onclick="showResults()">Show Results</button>
             </div>
         </div>
-    
+        <!-- Button spanning two columns -->
+        <div class="row">
+            <div class="col-md-12 text-center mt-3">
+                <button class="btn btn-success btn-lg col-md-6" onclick="showResults_stable()">Show Results STABLE VITON</button>
+            </div>
+        </div>
         <!-- Other content -->
     </div>
     
     <div class="patterns-container" id="imageContainer"></div>
+    <div class="patterns-container" id="imageContainer_stable"></div>
+
+    
 
     <script>
         function processResponse(buttonNumber, serverUrl) {
@@ -156,16 +179,19 @@
                 })
                 .catch(error => {
                    console.error('Fetch error:', error); // Log fetch errors
+                   document.getElementById('loading').style.display = 'none';
+                   document.getElementById(`content${buttonNumber}`).innerText = data.text;
+
                 });
         }
 
         function loadContent(buttonNumber) {
-            // if (buttonNumber === 10 || buttonNumber === 7) {
-            //     processResponse(buttonNumber, `http://62.67.51.161:5000/route_for_button_${buttonNumber}`);
-            // } else {
-            //     processResponse(buttonNumber, `/route_for_button_${buttonNumber}`);
-            // }
-            processResponse(buttonNumber, `/route_for_button_${buttonNumber}`);
+            if (buttonNumber === 8) {
+                processResponse(buttonNumber, `http://62.67.51.161:5000/route_for_button_${buttonNumber}`);
+            } else {
+                processResponse(buttonNumber, `/route_for_button_${buttonNumber}`);
+            }
+            // processResponse(buttonNumber, `/route_for_button_${buttonNumber}`);
         }
 
         function uploadImage() {
@@ -235,7 +261,32 @@
                 });
             }
 
-            function Refresh() {
+        
+        function showResults_stable() {
+            fetch('/get_all_stable_images') // Replace with the appropriate Flask route to retrieve image paths
+                .then(response => response.json())
+                .then(data => {
+                    // document.getElementById('startTrialButton_stable').style.display = 'block';
+                    // Access the image paths from the server response
+                    const imagePaths = data.imagePaths; // Adjust according to the actual response structure
+                    
+                    const imageContainer = document.getElementById('imageContainer_stable');
+                    
+                    // Loop through the image paths and create <img> elements to display images
+                    imagePaths.forEach(imagePath => {
+                        const img = document.createElement('img');
+                        img.src = imagePath;
+                        img.alt = 'Image';
+                        imageContainer.appendChild(img);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            }
+        
+
+        function Refresh() {
             fetch('/save_Refresh') // Replace with the appropriate Flask route to retrieve image paths
                 .then(response => response.json())
                 .then(data => {
@@ -244,14 +295,40 @@
                     const trialButton = document.getElementById('startTrialButton');
                     trialButton.classList.remove('btn-danger'); // Remove current color class
                     trialButton.classList.add('btn-success'); // Change to a different color class
-                    trialButton.innerText = 'Done refreshing. Will Automatically Restart';
-                    setTimeout(() => {}, 2000)
-                    window.location.reload();
+                    trialButton.innerText = 'Done Saving. Will refresh automatically';
+                    // setTimeout(() => {}, 3000)
+                    // window.location.reload();
                 })
                 .catch(error => {
                     console.error('Error:', error);
                 });
+            Refresh_stable()
             }
+        function Refresh_stable() {
+            fetch('http://62.67.51.161:5000/Refresh') // Replace with the appropriate Flask route to retrieve image paths
+                .then(response => response.json())
+                .then(data => {
+                    console.log("here")
+                    // Change button color and text after the request is finished
+                    // const trialButton = document.getElementById('startTrialButton_stable');
+                    // trialButton.classList.remove('btn-danger'); // Remove current color class
+                    // trialButton.classList.add('btn-success'); // Change to a different color class
+                    // trialButton.innerText = 'Done Saving. Will Automatically Restart';
+                    setTimeout(() => {}, 10000)
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // const trialButton = document.getElementById('startTrialButton_stable');
+                    // trialButton.classList.remove('btn-danger'); // Remove current color class
+                    // trialButton.classList.add('btn-success'); // Change to a different color class
+                    // trialButton.innerText = 'Done Saving. Will Automatically Restart';
+                    setTimeout(() => {}, 10000)
+                    window.location.reload();
+                });
+            }
+
+            
     </script>
 </body>
 </html>

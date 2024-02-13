@@ -13,3 +13,5 @@ densepose_rcnn_R_50_FPN_s1x.pkl
 cmake-3.13.0-Linux-x86_64.tar.gz
 keypoint_rcnn_R50_FPN.pkl
 Logged_Trails
+postprocessing
+samples

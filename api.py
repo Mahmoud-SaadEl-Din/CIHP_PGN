@@ -7,13 +7,14 @@ from os.path import join
 from inf_pgn import *
 import time
 from infer_cloth_mask import *
-from get_parse_agnostic import get_im_parse_agnostic_original, get_img_agnostic_human, read_pose_parse, read_pose_parse_detectron2
+from get_parse_agnostic import get_im_parse_agnostic_original, get_img_agnostic_human,get_img_agnostic_human2, read_pose_parse, read_pose_parse_detectron2
 import numpy as np
 from PIL import Image
 from self_visualized import infer_densepose
 from test_generator import infer_hr_viton
 from keypoints_detectron2 import *
 from flask import send_from_directory
+from comman_areas_refining import *
 
 app = Flask(__name__)
 
@@ -66,6 +67,11 @@ import requests
 @app.route('/serve_images/<path:filename>')
 def serve_images(filename):
     return send_from_directory('datasets/HR_VITON_group', filename)
+
+@app.route('/serve_images_stable/<path:filename>')
+def serve_images_stable(filename):
+    return send_from_directory('samples/unpair', filename)
+
 
 def send_to_diffusion2(image_path, txt):
     # URL of the GPU server where you'll upload the image
@@ -165,10 +171,15 @@ def route_for_button_3():
         if im_parse ==False:
             print(f"{im_name} ==> OpenPose Json file is not exist")
             continue
-        agnostic = get_img_agnostic_human(rgb_model, im_parse_np, pose_data)
+        agnostic,binary = get_img_agnostic_human2(rgb_model, im_parse_np, pose_data)
         out_path = join(out_dir, im_name)
         agnostic.save(out_path)
-       
+        print(type(binary))
+        binary.save(f"datalake_folder/agnostic-mask/{im_name}")
+        
+        send_to_diffusion2(join("datalake_folder", "agnostic-v3.2", im_name),"agnostic_gray")
+        send_to_diffusion2(join("datalake_folder", "agnostic-mask", im_name),"cloth_mask")
+        
     end = time.time()
     data = {
         "text": f"processed {len(os.listdir(out_dir))} images in {round((end-start),2)} seconds"
@@ -204,6 +215,8 @@ def route_for_button_5():
     images_dir = "datalake_folder/image"
     out_dir = "datalake_folder/image-densepose"
     infer_densepose(images_dir,out_dir)
+    for image_name in os.listdir(out_dir):
+        send_to_diffusion2(join("datalake_folder", "image-densepose", image_name),"densepose")
     end = time.time()
     data = {
         "text": f"processed {len(os.listdir(out_dir))} images in {round((end-start),2)} seconds"
@@ -215,6 +228,8 @@ def route_for_button_6():
     # Fetch data for button 1 (replace this with your logic)
     start = time.time()
     count = infere_cloth_mask("datalake_folder/cloth","datalake_folder/cloth-mask")
+    for image_name in os.listdir("datalake_folder/cloth-mask"):
+        send_to_diffusion2(join("datalake_folder", "cloth-mask", image_name),"cloth_mask")
     #send_to_diffusion2(img_path, "cloth_mask")
     end = time.time()
     data = {
@@ -287,6 +302,28 @@ def route_for_button_8():
     print(data)
     return jsonify(data)
 
+@app.route('/route_for_button_9')
+def route_for_button_9():
+    # Fetch data for button 1 (replace this with your logic)
+    start = time.time()
+    if len(os.listdir("samples/unpair")) != len(os.listdir("datalake_folder/image"))*len(os.listdir("datalake_folder/cloth")):
+        data = {
+            "text": f"NUM of {len(os.listdir('samples/unpair'))} images mismatch number of pairs {len(os.listdir('datalake_folder/image'))*len(os.listdir('datalake_folder/cloth'))}"
+        }
+        print(data)
+        return jsonify(data)
+
+
+    remove_gray_area(parsed_original_imgs="datalake_folder/image-parse-v3", diffused_imgs="samples/unpair",original_imgs_path="datalake_folder/image",out_path="postprocessing/no_gray")
+    infere_parser("postprocessing/no_gray","postprocessing/parsed")
+    take_diffused_tshist_to_original("postprocessing/no_gray","postprocessing/parsed","datalake_folder/image","postprocessing/final")
+    end = time.time()
+    data = {
+        "text": f"processed {len(os.listdir('postprocessing/final'))} images in {round((end-start),2)} seconds"
+    }
+    print(data)
+    return jsonify(data)
+
 
 @app.route('/get_all_images')
 def get_all_images():
@@ -295,6 +332,16 @@ def get_all_images():
     print("recieved the request")
     image_folder = 'datasets/HR_VITON_group'  # Change this to your actual image folder path
     image_paths = [f'/serve_images/{img}' for img in os.listdir(image_folder) if "grid" in img]
+    print("recieved the request with images", image_paths)
+    return jsonify({'imagePaths': image_paths})
+
+@app.route('/get_all_stable_images')
+def get_all__stable_images():
+    # Fetch image paths from your server or database dynamically
+    # This is just an example; replace it with your actual logic
+    print("recieved the request")
+    image_folder = 'samples/unpair'  # Change this to your actual image folder path
+    image_paths = [f'/serve_images_stable/{img}' for img in os.listdir(image_folder)]
     print("recieved the request with images", image_paths)
     return jsonify({'imagePaths': image_paths})
 
@@ -316,13 +363,15 @@ def save_Refresh():
         os.mkdir(join(main_folder, name))
     # print(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
     logged_dir = join("Logged_Trails", datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
-    os.makedirs(logged_dir)
+    os.makedirs(join(logged_dir, "HR_VITON"))
+    os.makedirs(join(logged_dir, "STABLE_VITON"))
     from distutils.dir_util import copy_tree
-    copy_tree("/root/diffusion_root/CIHP_PGN/datasets/HR_VITON_group", logged_dir)
-    l = ["HR_VITON_group"]
+    copy_tree("/root/diffusion_root/CIHP_PGN/datasets/HR_VITON_group", join(logged_dir,"HR_VITON"))
+    copy_tree("/root/diffusion_root/CIHP_PGN/samples/unpair", join(logged_dir,"STABLE_VITON"))
+    l = ["datasets/HR_VITON_group","samples/unpair"]
     for name in l:     
-        shutil.rmtree(join("datasets", name))
-        os.mkdir(join("datasets", name))
+        shutil.rmtree(name)
+        os.mkdir(name)
     if os.path.exists(join(main_folder,"pairs.txt")):
         os.remove(join(main_folder,"pairs.txt"))
     print("recieved the request to refresh")
@@ -332,39 +381,6 @@ def save_Refresh():
 # Define a route for handling image uploads
 @app.route('/upload_person', methods=['POST'])
 def upload_person():
-    # w = 768
-    # h = 1024
-    # l = ['image', 'image-parse-v3','image-parse-agnostic-v3.2', 'agnostic-v3.2', 'openpose_img', 'openpose_json','agnostic-v3.2','image-densepose']
-    # for name in l:
-    #     shutil.rmtree(join("datalake", name))
-    #     os.mkdir(join("datalake", name))
-    # start = time.time()
-    # # Handle the uploaded file here
-    # uploaded_file = request.files['file_p']
-    # img_name = uploaded_file.filename
-    # uploaded_file.save(join("datalake", "image", img_name))
-
-    # img = Image.open(join("datalake", "image", img_name))
-    # img_resize = img.resize((w, h))
-    # img_resize.save(join("datalake", "image", img_name))
-    # #send_to_diffusion2(join("datalake", "image", img_name),"person")
-    # end = time.time()
-    # parse_location = f"static/images/paired_{img_name}"
-    # shutil.copy(join("datalake", "image", img_name), parse_location)
-    # cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
-    # data = {
-	# 	"text": f"processed in {round((end-start),2)} seconds",
-	# 	"image": parse_location
-	# }
-    # print(data)
-    # os.remove("name.txt")
-    # f = open("name.txt", "a")
-    # f.write(img_name)
-    # f.close()
-    # #send_to_diffusion2("name.txt","names")
-    # # Return a response to the front end
-    # return jsonify(data)
-        # Access the uploaded files as a list (folder of images)
     uploaded_files = request.files.getlist('person_images')
     print(uploaded_files)
     c = 0
@@ -378,6 +394,7 @@ def upload_person():
         img = Image.open(join("datalake_folder", "image", image_name))
         img_resize = img.resize((w, h))
         img_resize.save(join("datalake_folder", "image", image_name))
+        send_to_diffusion2(join("datalake_folder", "image", image_name),"person")
         c+=1
 
     return jsonify({'text': f'{c} Person images uploaded successfully'})
@@ -386,38 +403,6 @@ def upload_person():
 # Define a route for handling image uploads
 @app.route('/upload_cloth', methods=['POST'])
 def upload_cloth():
-    # w = 768
-    # h = 1024
-    # l = ["cloth", "cloth-mask"]
-    # for name in l:     
-    #     shutil.rmtree(join("datalake", name))
-    #     os.mkdir(join("datalake", name))
-    # l = ["HR_VITON_outs"]
-    # for name in l:     
-    #     shutil.rmtree(join("datasets", name))
-    #     os.mkdir(join("datasets", name))
-    # if os.path.exists(join("datalake","pairs.txt")):
-    #     os.remove(join("datalake","pairs.txt"))
-    # start = time.time()
-    # # Handle the uploaded file here
-    # uploaded_file = request.files['file_c']
-    # img_name = uploaded_file.filename
-    # uploaded_file.save(join("datalake", "cloth", img_name))
-    # img = Image.open(join("datalake", "cloth", img_name))
-    # img_resize = img.resize((w, h))
-    # img_resize.save(join("datalake", "cloth", img_name))
-    # #send_to_diffusion2(join("datalake", "cloth", img_name),"cloth")
-    # end = time.time()
-    # parse_location = f"static/images/unpaired_{img_name}"
-    # shutil.copy(join("datalake", "cloth", img_name), parse_location)
-    # cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
-    # data = {
-	# 	"text": f"processed in {round((end-start),2)} seconds",
-	# 	"image": parse_location
-	# }
-    # # Return a response to the front end
-    # return jsonify(data)
-    # Access the uploaded files as a list (folder of images)
     uploaded_files = request.files.getlist('cloth_images')
     c= 0 
     w = 768
@@ -430,6 +415,8 @@ def upload_cloth():
         img = Image.open(join("datalake_folder", "cloth", image_name))
         img_resize = img.resize((w, h))
         img_resize.save(join("datalake_folder", "cloth", image_name))
+        send_to_diffusion2(join("datalake_folder", "cloth", image_name),"cloth")
+
         c+=1
 
     return jsonify({'text': f'{c} cloth images uploaded successfully'})

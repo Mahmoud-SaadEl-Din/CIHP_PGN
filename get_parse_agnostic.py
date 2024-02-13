@@ -78,34 +78,121 @@ def get_img_agnostic_human(img, parse, pose_data):
     r = int(length_a / 16) + 1
     
     # mask arms
-    # agnostic_draw.line([tuple(pose_data[i]) for i in [6, 5]], 'gray', width=r*7)
+    # agnostic_draw.line([tuple(pose_data[i]) for i in [6, 5]], color, width=r*7)
+    color = (128,128,128)
     for i in [6, 5]:
         pointx, pointy = pose_data[i]
-        agnostic_draw.ellipse((pointx-r*5, pointy-r*5, pointx+r*5, pointy+r*5), 'gray', 'gray')
+        agnostic_draw.ellipse((pointx-r*5, pointy-r*5, pointx+r*5, pointy+r*5), color, color)
     for i in [8, 10, 7, 9]:
         if (pose_data[i - 1, 0] == 0.0 and pose_data[i - 1, 1] == 0.0) or (pose_data[i, 0] == 0.0 and pose_data[i, 1] == 0.0):
             continue
-        agnostic_draw.line([tuple(pose_data[j]) for j in [i - 1, i]], 'gray', width=r*6)
+        agnostic_draw.line([tuple(pose_data[j]) for j in [i - 1, i]], color, width=r*6)
         pointx, pointy = pose_data[i]
-        agnostic_draw.ellipse((pointx-r*2, pointy-r*2, pointx+r*2, pointy+r*2), 'gray', 'gray')
+        agnostic_draw.ellipse((pointx-r*2, pointy-r*2, pointx+r*2, pointy+r*2), color, color)
 
     # mask torso
     for i in [12, 11]:
         pointx, pointy = pose_data[i]
-        agnostic_draw.ellipse((pointx-r*3, pointy-r*6, pointx+r*3, pointy+r*6), 'gray', 'gray')
-    agnostic_draw.line([tuple(pose_data[i]) for i in [6, 12]], 'gray', width=r*10)
-    agnostic_draw.line([tuple(pose_data[i]) for i in [5, 11]], 'gray', width=r*10)
-    agnostic_draw.line([tuple(pose_data[i]) for i in [12, 11]], 'gray', width=r*12)
-    agnostic_draw.polygon([tuple(pose_data[i]) for i in [6, 5, 11, 12]], 'gray', 'gray')
+        agnostic_draw.ellipse((pointx-r*3, pointy-r*6, pointx+r*3, pointy+r*6), color, color)
+    agnostic_draw.line([tuple(pose_data[i]) for i in [6, 12]], color, width=r*10)
+    agnostic_draw.line([tuple(pose_data[i]) for i in [5, 11]], color, width=r*10)
+    agnostic_draw.line([tuple(pose_data[i]) for i in [12, 11]], color, width=r*12)
+    agnostic_draw.polygon([tuple(pose_data[i]) for i in [6, 5, 11, 12]], color, color)
 
     # mask neck
     pointx, pointy = pose_data[1]
     pointx, pointy = (pose_data[5] + pose_data[6]) / 2
-    agnostic_draw.rectangle((pointx-r*8, pointy-r*8, pointx+r*8, pointy+r*8), 'gray', 'gray')
+    agnostic_draw.rectangle((pointx-r*8, pointy-r*8, pointx+r*8, pointy+r*8), color, color)
+    
+    
     agnostic.paste(img, None, Image.fromarray(np.uint8(parse_head * 255), 'L'))
     agnostic.paste(img, None, Image.fromarray(np.uint8(parse_lower * 255), 'L'))
 
     return agnostic
+
+
+def get_img_agnostic_human2(img, parse, pose_data, color=(128, 128, 128),color_mask=(255,255,255)):
+    parse_array = parse
+    parse_head = ((parse_array == 4).astype(np.float32) +
+                  (parse_array == 13).astype(np.float32))
+    parse_lower = ((parse_array == 9).astype(np.float32) +
+                   (parse_array == 12).astype(np.float32) +
+                   (parse_array == 16).astype(np.float32) +
+                   (parse_array == 17).astype(np.float32) +
+                   (parse_array == 18).astype(np.float32) +
+                   (parse_array == 19).astype(np.float32))
+
+    agnostic = img.copy()
+    agnostic_draw = ImageDraw.Draw(agnostic)
+
+    # Create a binary mask to track filled areas with RGB channels
+    binary_mask = Image.new("RGB", img.size, (0, 0, 0))
+    white_img = Image.new("RGB", img.size, (0, 0, 0))
+
+    binary_mask_draw = ImageDraw.Draw(binary_mask)
+
+    
+    
+    # agnostic_draw.ellipse((pose_data[6][0],pose_data[6][1], pose_data[11][0],pose_data[11][1]), color, color)
+    # agnostic_draw.ellipse((pose_data[5][0],pose_data[5][1], pose_data[11][0],pose_data[11][1]), color, color)
+    # agnostic_draw.ellipse((pose_data[6][0],pose_data[6][1], pose_data[12][0],pose_data[12][1]), color, color)
+    # agnostic_draw.ellipse((pose_data[5][0],pose_data[5][1], pose_data[12][0],pose_data[12][1]), color, color)
+    print(pose_data[5])
+    pairs = [[5,6],[7,8],[9,10],[5,7],[7,9],[6,8],[8,10]]
+    for i,j in pairs:
+        shape = [tuple(pose_data[i]),tuple(pose_data[j])]
+        agnostic_draw.line(shape, color, width=110)
+        binary_mask_draw.line(shape, color_mask, width=110)
+
+
+    length_a = np.linalg.norm(pose_data[5] - pose_data[6])
+    length_b = np.linalg.norm(pose_data[11] - pose_data[12])
+    point = (pose_data[12] + pose_data[11]) / 2
+    pose_data[12] = point + (pose_data[12] - point) / length_b * length_a
+    pose_data[11] = point + (pose_data[11] - point) / length_b * length_a
+    r = int(length_a / 16) + 1
+
+    # mask arms
+    for i in [6, 5]:
+        pointx, pointy = pose_data[i]
+        agnostic_draw.ellipse((pointx - r * 5, pointy - r * 5, pointx + r * 5, pointy + r * 5), color, color)
+        binary_mask_draw.ellipse((pointx - r * 5, pointy - r * 5, pointx + r * 5, pointy + r * 5), color_mask, color_mask)
+
+    for i in [8, 10, 7, 9]:
+        if (pose_data[i - 1, 0] == 0.0 and pose_data[i - 1, 1] == 0.0) or (
+                pose_data[i, 0] == 0.0 and pose_data[i, 1] == 0.0):
+            continue
+        agnostic_draw.line([tuple(pose_data[j]) for j in [i - 1, i]], color, width=r * 6)
+        binary_mask_draw.line([tuple(pose_data[j]) for j in [i - 1, i]], color_mask, width=r * 6)
+        pointx, pointy = pose_data[i]
+        agnostic_draw.ellipse((pointx - r * 2, pointy - r * 2, pointx + r * 2, pointy + r * 2), color, color)
+        binary_mask_draw.ellipse((pointx - r * 2, pointy - r * 2, pointx + r * 2, pointy + r * 2), color_mask, color_mask)
+
+    # mask torso
+    for i in [12, 11]:
+        pointx, pointy = pose_data[i]
+        agnostic_draw.ellipse((pointx - r * 3, pointy - r * 6, pointx + r * 3, pointy + r * 6), color, color)
+        binary_mask_draw.ellipse((pointx - r * 3, pointy - r * 6, pointx + r * 3, pointy + r * 6), color_mask, color_mask)
+    agnostic_draw.line([tuple(pose_data[i]) for i in [6, 12]], color, width=r * 10)
+    agnostic_draw.line([tuple(pose_data[i]) for i in [5, 11]], color, width=r * 10)
+    agnostic_draw.line([tuple(pose_data[i]) for i in [12, 11]], color, width=r * 12)
+    agnostic_draw.polygon([tuple(pose_data[i]) for i in [6, 5, 11, 12]], color, color)
+    binary_mask_draw.line([tuple(pose_data[i]) for i in [6, 12]], color_mask, r * 10)
+    binary_mask_draw.line([tuple(pose_data[i]) for i in [5, 11]], color_mask, r * 10)
+    binary_mask_draw.line([tuple(pose_data[i]) for i in [12, 11]], color_mask, r * 12)
+    binary_mask_draw.polygon([tuple(pose_data[i]) for i in [6, 5, 11, 12]], color_mask, color_mask)
+
+    # mask neck
+    pointx, pointy = (pose_data[5] + pose_data[6]) / 2
+    agnostic_draw.rectangle((pointx-r*8, pointy-r*8, pointx+r*8, pointy+r*8), color, color)
+    binary_mask_draw.rectangle((pointx - r * 8, pointy - r * 8, pointx + r * 8, pointy + r * 8), color_mask, color_mask)
+
+    # Paste the original image based on masks
+    agnostic.paste(img, None, Image.fromarray(np.uint8(parse_head * 255), 'L'))
+    agnostic.paste(img, None, Image.fromarray(np.uint8(parse_lower * 255), 'L'))
+    binary_mask.paste(white_img, None, Image.fromarray(np.uint8(parse_head * 255), 'L'))
+    binary_mask.paste(white_img, None, Image.fromarray(np.uint8(parse_lower * 255), 'L'))
+    return agnostic, binary_mask
 
 
 def read_pose_parse(root_path, im_name):

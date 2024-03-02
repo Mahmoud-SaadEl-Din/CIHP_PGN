@@ -8,6 +8,9 @@ def conditional_merge(im_rgb_diffused,im_rgb_originnal,im_parse=None):
     print(im_rgb_originnal.shape, im_rgb_diffused.shape)
     im_rgb_originnal[im_parse==5] = im_rgb_diffused[im_parse==5]
     im_rgb_originnal[im_parse==6] = im_rgb_diffused[im_parse==6]
+    im_rgb_originnal[im_parse==14] = im_rgb_diffused[im_parse==14]
+    im_rgb_originnal[im_parse==15] = im_rgb_diffused[im_parse==15]
+    
 
     return im_rgb_originnal
 
@@ -17,6 +20,7 @@ def take_diffused_tshist_to_original(diffused_imgs,parsed_diffused,original_img,
     images_dict = {image.split(".")[0]:image for image in os.listdir(original_img)}
     for image in os.listdir(diffused_imgs):
         ori_img = cv2.imread(join(original_img, images_dict[image.split("_")[0]]))
+        ori_img = cv2.resize(ori_img,(384,512))
         diffused_img = cv2.imread(join(diffused_imgs,image))
         with open(join(parsed_diffused, image.replace(".jpg","_vis2.npy")), 'rb') as f:
             im_parse_np = np.load(f)
@@ -55,18 +59,18 @@ def remove_gray_area(parsed_original_imgs,diffused_imgs,original_imgs_path,out_p
     images_dict = {image.split(".")[0]:image for image in os.listdir(original_imgs_path)}
     for image in os.listdir(diffused_imgs):
             print(image)
-            im_gray = cv2.imread(join(parsed_original_imgs,image.split("_")[0]+"_vis.png"), cv2.IMREAD_GRAYSCALE)
+            # im_gray = cv2.imread(join(parsed_original_imgs,image.split("_")[0]+"_vis.png"), cv2.IMREAD_GRAYSCALE)
             im_rgb = cv2.imread(join(diffused_imgs,image))
-            im_rgb_original = cv2.imread(join(original_imgs_path, images_dict[image.split("_")[0]]))
+            # im_rgb_original = cv2.imread(join(original_imgs_path, images_dict[image.split("_")[0]]))
 
 
-            bw = cv2.threshold(im_gray, 7, 255, cv2.THRESH_BINARY)[1]
+            # bw = cv2.threshold(im_gray, 7, 255, cv2.THRESH_BINARY)[1]
         
-            segmented_image = cv2.bitwise_and(im_rgb, im_rgb, mask=bw)
-            segmented_image[bw == 0] = im_rgb_original[bw == 0]
-            segmented_image[np.all(segmented_image == [128, 128, 128], axis=-1)] = [255,255,255]
+            # segmented_image = cv2.bitwise_and(im_rgb, im_rgb, mask=bw)
+            # segmented_image[bw == 0] = im_rgb_original[bw == 0]
+            # segmented_image[np.all(segmented_image == [128, 128, 128], axis=-1)] = [255,255,255]
 
-            cv2.imwrite(join(out_path,image), segmented_image)
+            cv2.imwrite(join(out_path,image), im_rgb)
 
 
 

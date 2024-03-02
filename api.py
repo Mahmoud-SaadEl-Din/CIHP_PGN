@@ -368,7 +368,7 @@ def save_Refresh():
     from distutils.dir_util import copy_tree
     copy_tree("/root/diffusion_root/CIHP_PGN/datasets/HR_VITON_group", join(logged_dir,"HR_VITON"))
     copy_tree("/root/diffusion_root/CIHP_PGN/samples/unpair", join(logged_dir,"STABLE_VITON"))
-    l = ["datasets/HR_VITON_group","samples/unpair"]
+    l = ["datasets/HR_VITON_group","samples/unpair", "test/test/classified_poses"]
     for name in l:     
         shutil.rmtree(name)
         os.mkdir(name)

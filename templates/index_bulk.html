@@ -74,6 +74,10 @@
     <div class="row">
         <div class="col">
             <div class="mb-3">
+                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="select_poses()">On-need: Filter image by poses</button>
+                <div id="content1"></div>
+            </div>
+            <div class="mb-3">
                 <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(1)">Step (1): Person Parsing Segmentation</button>
                 <div id="content1"></div>
             </div>
@@ -192,6 +196,22 @@
                 processResponse(buttonNumber, `/route_for_button_${buttonNumber}`);
             }
             // processResponse(buttonNumber, `/route_for_button_${buttonNumber}`);
+        }
+        function select_poses() {
+            document.getElementById('loading').style.display = 'block';
+            fetch('http://62.67.51.161:5000/select_poses')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loading').style.display = 'none';
+                    console.log('Received data:', data); 
+                    document.getElementById(`content${buttonNumber}`).innerText = data.text;
+                })
+                .catch(error => {
+                   console.error('Fetch error:', error); // Log fetch errors
+                   document.getElementById('loading').style.display = 'none';
+                   document.getElementById(`content${buttonNumber}`).innerText = data.text;
+
+                });
         }
 
         function uploadImage() {

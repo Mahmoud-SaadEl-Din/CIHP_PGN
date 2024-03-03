@@ -15,6 +15,7 @@ from test_generator import infer_hr_viton
 from keypoints_detectron2 import *
 from flask import send_from_directory
 from comman_areas_refining import *
+from DB_manager import *
 
 app = Flask(__name__)
 
@@ -122,11 +123,21 @@ def index_bulk():
     return render_template('index_bulk.html')
 
 
-@app.route('/route_for_button_1')
-def route_for_button_1():
+@app.route('/prerequiste')
+def prerequiste():
     # Fetch data for button 1 (replace this with your logic)
     start = time.time()
+    #step #1
     count = infere_parser("datalake_folder/image","datalake_folder/image-parse-v3")
+    # step 2
+    detectron_poses()
+    #step 3
+    mask_agnostic()
+    #step 4
+    gray_agnostic()
+    #step 5
+    detectron_densepose()
+
     end = time.time()
     print(count)
     data = {
@@ -135,8 +146,8 @@ def route_for_button_1():
     print(data)
     return jsonify(data)
 
-@app.route('/route_for_button_2')
-def route_for_button_2():
+
+def mask_agnostic():
     # Fetch data for button 1 (replace this with your logic)
     start = time.time()
     images_dir = "datalake_folder/image"
@@ -159,8 +170,7 @@ def route_for_button_2():
     }
     return jsonify(data)
 
-@app.route('/route_for_button_3')
-def route_for_button_3():
+def gray_agnostic():
     # Fetch data for button 1 (replace this with your logic)
     start = time.time()
     images_dir = "datalake_folder/image"
@@ -186,30 +196,20 @@ def route_for_button_3():
     }
     return jsonify(data)
 
-@app.route('/route_for_button_4')
-def route_for_button_4():
+def detectron_poses():
     in_dir = "/root/diffusion_root/CIHP_PGN/datalake_folder/image"
     out_dir = "/root/diffusion_root/CIHP_PGN/datalake_folder/openpose_img"
     json_dir = "/root/diffusion_root/CIHP_PGN/datalake_folder/openpose_json"
-    # exe_bin_file = "./build/examples/openpose/openpose.bin"
     start = time.time()
-    # os.chdir("/root/diffusion_root/CIHP_PGN/openpose")
-    # cmd_ = f"{exe_bin_file} --image_dir {in_dir} --disable_blending --write_images {out_dir} --hand --write_json {json_dir} --display 0 --net_resolution '64x64'"
-    # success = os.system(cmd_)
     pose_dir(in_dir, out_dir, json_dir)
     end = time.time()
     data = {
 		"text": f"processed {len(os.listdir(json_dir))} images in {round((end-start),2)} seconds"
 	}
-    # if success ==0:
-    #     os.chdir("/root/diffusion_root/CIHP_PGN")
-    #     data = {
-	# 		"text": f"processed {len(os.listdir(json_dir))} in {round((end-start),2)} seconds"
-	# 	}
+
     return jsonify(data)
 
-@app.route('/route_for_button_5')
-def route_for_button_5():
+def detectron_densepose():
     # Fetch data for button 5 (replace this with your logic)
     start = time.time()
     images_dir = "datalake_folder/image"
@@ -223,87 +223,9 @@ def route_for_button_5():
         }
     return jsonify(data)
 
-@app.route('/route_for_button_6')
-def route_for_button_6():
-    # Fetch data for button 1 (replace this with your logic)
-    start = time.time()
-    count = infere_cloth_mask("datalake_folder/cloth","datalake_folder/cloth-mask")
-    for image_name in os.listdir("datalake_folder/cloth-mask"):
-        send_to_diffusion2(join("datalake_folder", "cloth-mask", image_name),"cloth_mask")
-    #send_to_diffusion2(img_path, "cloth_mask")
-    end = time.time()
-    data = {
-        "text": f"processed {count} images in {round((end-start),2)} seconds"
-    }
-    return jsonify(data)
 
-@app.route('/route_for_button_7')
-def route_for_button_7():
-    # Fetch data for button 1 (replace this with your logic)
-    start = time.time()
-    out_path = "datasets/HR_VITON_group"
-    infer_hr_viton("datalake_folder",out_path,"pairs.txt")
-    end = time.time()
-    data = {
-        "text": f"processed {len(os.listdir(out_path)) // 2} images in {round((end-start),2)} seconds"
-    }
-    print(data)
-    return jsonify(data)
-
-@app.route('/route_for_button_8')
-def route_for_button_8():
-    # Fetch data for button 1 (replace this with your logic)
-    start = time.time()
-    infere_parser("datalake/image","datalake/image-parse-v3")
-    ##############################################
-    in_dir = "/root/diffusion_root/CIHP_PGN/datalake/image"
-    out_dir = "/root/diffusion_root/CIHP_PGN/datalake/openpose_img"
-    json_dir = "/root/diffusion_root/CIHP_PGN/datalake/openpose_json"
-    exe_bin_file = "./build/examples/openpose/openpose.bin"
-    os.chdir("/root/diffusion_root/CIHP_PGN/openpose")
-    cmd_ = f"{exe_bin_file} --image_dir {in_dir} --disable_blending --write_images {out_dir} --hand --write_json {json_dir} --display 0 --net_resolution '64x64'"
-    success = os.system(cmd_)
-    if success == 1:
-        print("true succss")
-    #########################################
-    os.chdir("/root/diffusion_root/CIHP_PGN")
-    f = open("name.txt", "r")
-    im_name = f.read()
-    print(im_name)
-    im_parse, im_parse_np, pose_data, parse_name, parse_name_npy = read_pose_parse("datalake",im_name)
-    agnostic,agnostic_mask = get_im_parse_agnostic_original(im_parse, im_parse_np, pose_data)
-    out_path = join("datalake","image-parse-agnostic-v3.2", parse_name)
-    agnostic.save(out_path)
-
-    with open(join("datalake","image-parse-agnostic-v3.2", parse_name_npy), 'wb') as f:
-        np.save(f, agnostic_mask)
-    ########################################
-    rgb_model = Image.open(join("datalake","image", im_name))
-    agnostic = get_img_agnostic_human(rgb_model, im_parse_np, pose_data)
-    out_path = join("datalake","agnostic-v3.2", im_name)
-    agnostic.save(out_path)
-    ############################################
-    infer_densepose("datalake/image","datalake/image-densepose")
-    ############################################
-    img_path = infere_cloth_mask("/root/diffusion_root/CIHP_PGN/datalake/cloth","/root/diffusion_root/CIHP_PGN/datalake/cloth-mask")
-    ############################################
-    out_path = "datasets/HR_VITON_outs"
-    infer_hr_viton("datalake",out_path,"pairs.txt")
-    paired = os.listdir(out_path)
-    im_name = paired[0] if "grid" in paired[1] else paired[1]
-    parse_location = f"static/images/paired_{im_name}"
-    shutil.copy(join(out_path, im_name), parse_location)
-    cv2.imwrite(parse_location, image_resize(cv2.imread(parse_location), height=256))
-    end = time.time()
-    data = {
-        "text": f"processed in {round((end-start),2)} seconds",
-        "image": parse_location
-    }
-    print(data)
-    return jsonify(data)
-
-@app.route('/route_for_button_9')
-def route_for_button_9():
+@app.route('/post_processing')
+def post_processing():
     # Fetch data for button 1 (replace this with your logic)
     start = time.time()
     if len(os.listdir("samples/unpair")) != len(os.listdir("datalake_folder/image"))*len(os.listdir("datalake_folder/cloth")):
@@ -325,16 +247,6 @@ def route_for_button_9():
     return jsonify(data)
 
 
-@app.route('/get_all_images')
-def get_all_images():
-    # Fetch image paths from your server or database dynamically
-    # This is just an example; replace it with your actual logic
-    print("recieved the request")
-    image_folder = 'datasets/HR_VITON_group'  # Change this to your actual image folder path
-    image_paths = [f'/serve_images/{img}' for img in os.listdir(image_folder) if "grid" in img]
-    print("recieved the request with images", image_paths)
-    return jsonify({'imagePaths': image_paths})
-
 @app.route('/get_all_stable_images')
 def get_all__stable_images():
     # Fetch image paths from your server or database dynamically
@@ -349,32 +261,8 @@ def get_all__stable_images():
 
 @app.route('/save_Refresh')
 def save_Refresh():
-    # Fetch image paths from your server or database dynamically
-    # This is just an example; replace it with your actual logic
-    main_folder = "datalake_folder"
+
     
-    l = ['image', 'image-parse-v3','image-parse-agnostic-v3.2', 'agnostic-v3.2', 'openpose_img', 'openpose_json','agnostic-v3.2','image-densepose']
-    for name in l:
-        shutil.rmtree(join(main_folder, name))
-        os.mkdir(join(main_folder, name))
-    l = ["cloth", "cloth-mask"]
-    for name in l:     
-        shutil.rmtree(join(main_folder, name))
-        os.mkdir(join(main_folder, name))
-    # print(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
-    logged_dir = join("Logged_Trails", datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
-    os.makedirs(join(logged_dir, "HR_VITON"))
-    os.makedirs(join(logged_dir, "STABLE_VITON"))
-    from distutils.dir_util import copy_tree
-    copy_tree("/root/diffusion_root/CIHP_PGN/datasets/HR_VITON_group", join(logged_dir,"HR_VITON"))
-    copy_tree("/root/diffusion_root/CIHP_PGN/samples/unpair", join(logged_dir,"STABLE_VITON"))
-    l = ["datasets/HR_VITON_group","samples/unpair", "test/test/classified_poses"]
-    for name in l:     
-        shutil.rmtree(name)
-        os.mkdir(name)
-    if os.path.exists(join(main_folder,"pairs.txt")):
-        os.remove(join(main_folder,"pairs.txt"))
-    print("recieved the request to refresh")
     return jsonify({'text': f'Refreshed Successfully successfully'})
 
 

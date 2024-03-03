@@ -52,86 +52,38 @@
                     <div class="d-grid mb-3">
                         <button class="btn btn-danger btn-lg" id="startTrialButton" style="display: none;" type="button" onclick="Refresh()">Click here after you analysis the results to SAVE it</button>
                     </div>
-                    <!-- <div class="d-grid mb-3">
-                        <button class="btn btn-danger btn-lg" id="startTrialButton_stable" style="display: none;" type="button" onclick="Refresh_stable()">Save STABLE VITON Results</button>
-                    </div> -->
                 </div>
             </div>
         </div>
-        
-
-        <!-- <div class="pattern">
-            <button class="btn btn-warning" onclick="loadContent(8)">Automate pipeline</button>
-            <div id="content8"></div>
-            <img id="image8" style="display: none;" src="" alt="Image 8">
-        </div> -->
-
     </div>
-    
-
     <div class="container">
-<div class="container">
     <div class="row">
         <div class="col">
             <div class="mb-3">
                 <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="select_poses()">On-need: Filter image by poses</button>
                 <div id="content1"></div>
             </div>
+        </div>
+        <div class="col">
             <div class="mb-3">
-                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(1)">Step (1): Person Parsing Segmentation</button>
+                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="prerequiste()">Step (1): STABLE VITON pre-requesit</button>
                 <div id="content1"></div>
             </div>
         </div>
         <div class="col">
             <div class="mb-3">
-                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(4)">Step (2): Person Pose & Keypoints</button>
-                <div id="content4"></div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3">
-                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(2)">Step (3): Parsing Segmentation Agnostic </button>
-                <div id="content2"></div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3">
-                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(3)">Step (4): Person Agnostic</button>
-                <div id="content3"></div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3">
-                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(5)">Step (5): Getting Densepose</button>
-                <div id="content5"></div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3">
-                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(6)">Step (6): Cloth Binary Masking</button>
-                <div id="content6"></div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3">
-                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(7)">Final Step: TRY-ON</button>
-                <div id="content7"></div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3">
-                <button class="btn btn-danger btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(8)">NEW: STABLE VITON</button>
+                <button class="btn btn-danger btn-lg mb-3" style="width: 160px; height: 200px;" onclick="SV()">NEW: STABLE VITON</button>
                 <div id="content8"></div>
             </div>
         </div>
         <div class="col">
             <div class="mb-3">
-                <button class="btn btn-danger btn-lg mb-3" style="width: 160px; height: 200px;" onclick="loadContent(9)">Refine: STABLE VITON</button>
+                <button class="btn btn-danger btn-lg mb-3" style="width: 160px; height: 200px;" onclick="postprocessing()">Refine: STABLE VITON</button>
                 <div id="content8"></div>
             </div>
         </div>
     </div>
-</div>
+    </div>
 
 
         
@@ -149,14 +101,6 @@
     
 
     <div class="container">
-        <!-- Other content -->
-    
-        <!-- Button spanning two columns -->
-        <div class="row">
-            <div class="col-md-12 text-center mt-3">
-                <button class="btn btn-success btn-lg col-md-6" onclick="showResults()">Show Results</button>
-            </div>
-        </div>
         <!-- Button spanning two columns -->
         <div class="row">
             <div class="col-md-12 text-center mt-3">
@@ -165,38 +109,12 @@
         </div>
         <!-- Other content -->
     </div>
-    
-    <div class="patterns-container" id="imageContainer"></div>
+
     <div class="patterns-container" id="imageContainer_stable"></div>
 
     
 
     <script>
-        function processResponse(buttonNumber, serverUrl) {
-            document.getElementById('loading').style.display = 'block';
-            fetch(serverUrl)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('loading').style.display = 'none';
-                    console.log('Received data:', data); 
-                    document.getElementById(`content${buttonNumber}`).innerText = data.text;
-                })
-                .catch(error => {
-                   console.error('Fetch error:', error); // Log fetch errors
-                   document.getElementById('loading').style.display = 'none';
-                   document.getElementById(`content${buttonNumber}`).innerText = data.text;
-
-                });
-        }
-
-        function loadContent(buttonNumber) {
-            if (buttonNumber === 8) {
-                processResponse(buttonNumber, `http://62.67.51.161:5000/route_for_button_${buttonNumber}`);
-            } else {
-                processResponse(buttonNumber, `/route_for_button_${buttonNumber}`);
-            }
-            // processResponse(buttonNumber, `/route_for_button_${buttonNumber}`);
-        }
         function select_poses() {
             document.getElementById('loading').style.display = 'block';
             fetch('http://62.67.51.161:5000/select_poses')
@@ -213,6 +131,61 @@
 
                 });
         }
+
+        function prerequiste() {
+            document.getElementById('loading').style.display = 'block';
+            fetch('/prerequiste')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loading').style.display = 'none';
+                    console.log('Received data:', data); 
+                    
+                })
+                .catch(error => {
+                   console.error('Fetch error:', error); // Log fetch errors
+                   document.getElementById('loading').style.display = 'none';
+                });
+        }
+
+        function SV() {
+            document.getElementById('loading').style.display = 'block';
+            fetch('http://62.67.51.161:5000/route_for_button_8')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loading').style.display = 'none';
+                    console.log('Received data:', data); 
+                    
+                })
+                .catch(error => {
+                   console.error('Fetch error:', error); // Log fetch errors
+                   document.getElementById('loading').style.display = 'none';
+                });
+        }
+
+
+        function postprocessing() {
+            document.getElementById('loading').style.display = 'block';
+            fetch('/post_processing')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loading').style.display = 'none';
+                    console.log('Received data:', data); 
+                    
+                })
+                .catch(error => {
+                   console.error('Fetch error:', error); // Log fetch errors
+                   document.getElementById('loading').style.display = 'none';
+                });
+        }
+
+        function prerequesite(){
+            if (buttonNumber === 8) {
+                processResponse(buttonNumber, `http://62.67.51.161:5000/route_for_button_${buttonNumber}`);
+            } else {
+                processResponse(buttonNumber, `/route_for_button_${buttonNumber}`);
+            }
+        }
+        
 
         function uploadImage() {
             let formData = new FormData();
@@ -257,30 +230,6 @@
                 console.error('Error:', error);
             });
         }
-    
-        function showResults() {
-            fetch('/get_all_images') // Replace with the appropriate Flask route to retrieve image paths
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('startTrialButton').style.display = 'block';
-                    // Access the image paths from the server response
-                    const imagePaths = data.imagePaths; // Adjust according to the actual response structure
-                    
-                    const imageContainer = document.getElementById('imageContainer');
-                    
-                    // Loop through the image paths and create <img> elements to display images
-                    imagePaths.forEach(imagePath => {
-                        const img = document.createElement('img');
-                        img.src = imagePath;
-                        img.alt = 'Image';
-                        imageContainer.appendChild(img);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            }
-
         
         function showResults_stable() {
             fetch('/get_all_stable_images') // Replace with the appropriate Flask route to retrieve image paths

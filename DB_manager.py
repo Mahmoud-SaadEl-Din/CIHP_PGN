@@ -1,6 +1,5 @@
 import mysql.connector
 from mysql.connector import Error
-import pandas as pd
 from datetime import date
 
 
@@ -8,12 +7,6 @@ create_images_table = """
 CREATE TABLE images (
   image_id INT AUTO_INCREMENT PRIMARY KEY,
   img_path VARCHAR(40) NOT NULL,
-  parser_path VARCHAR(40),
-  pose_path VARCHAR(40),
-  keypoint_path VARCHAR(40),
-  seg_agnos_path VARCHAR(40),
-  gray_agnos_path VARCHAR(40),
-  densepose_path VARCHAR(40),
   register_time DATE
   );
  """
@@ -82,9 +75,10 @@ def execute_query(connection, query):
         print(f"Error: '{err}'")
 
 
-def show_tables(connection,table):
+def show_tables(table):
+    connection = create_db_connection("localhost","root","Inno26489*","VITON")
     cursor = connection.cursor()
-
+    print("Table")
     cursor.execute(f"SELECT * FROM {table}")
 
     # Fetch all rows
@@ -94,8 +88,8 @@ def show_tables(connection,table):
     for row in rows:
         print(row)
 
-def insert_rows(connection, table_name, columns, data):
-
+def insert_rows(table_name, columns, data):
+    connection = create_db_connection("localhost","root","Inno26489*","VITON")
     cursor = connection.cursor()
 
     # Prepare SQL query
@@ -108,7 +102,8 @@ def insert_rows(connection, table_name, columns, data):
     # Commit changes and close connection
     connection.commit()
 
-def delete_all_rows(conn, table_name):
+def delete_all_rows(table_name):
+    conn = create_db_connection("localhost","root","Inno26489*","VITON")
 
     cursor = conn.cursor()
 
@@ -127,17 +122,10 @@ images_table_name = 'images'
 clothes_table_name = 'clothes'
 vitons_table_name = 'vitons'
 
-images_table_columns = ["img_path","parser_path","pose_path","keypoint_path","seg_agnos_path","gray_agnos_path","densepose_path","register_time"]
-clothes_table_columns = ["cloth_id","cloth_path","register_time"]
-vitons_table_columns = ["viton_id","image_id","cloth_id","viton_path","register_time"]
-data = [
-    ('/root/folder/file1.txt', '/root/folder/file2.txt', '/root/folder/file3.txt', '/root/folder/file4.txt', '/root/folder/file5.txt', '/root/folder/file6.txt', '/root/folder/file7.txt', date(2022, 1, 15)),
-    ('/user/documents/doc1.txt', '/user/documents/doc2.txt', '/user/documents/doc3.txt', '/user/documents/doc4.txt', '/user/documents/doc5.txt', '/user/documents/doc6.txt', '/user/documents/doc7.txt', date(2024, 1, 15)),
-    ('/user/documents/doc1.txt', '/user/documents/doc2.txt', '/user/documents/doc3.txt', '/user/documents/doc4.txt', '/user/documents/doc5.txt', '/user/documents/doc6.txt', '/user/documents/doc7.txt', date(2022, 1, 15)),
-    ('/user/documents/doc1.txt', '/user/documents/doc2.txt', '/user/documents/doc3.txt', '/user/documents/doc4.txt', '/user/documents/doc5.txt', '/user/documents/doc6.txt', '/user/documents/doc7.txt', date(2023, 1, 15)),
-    # Add more rows as needed
-]
-
+images_table_columns_v1 = ["img_path","parser_path","pose_path","keypoint_path","seg_agnos_path","gray_agnos_path","densepose_path"]
+images_table_columns_v2 = ["img_path"]
+clothes_table_columns = ["cloth_path"]
+vitons_table_columns = ["image_id","cloth_id","viton_path"]
 
 my_queries = {
     "create": "CREATE DATABASE VITON",
@@ -145,6 +133,63 @@ my_queries = {
     "show_clothes": "SELECT * FROM clothes",
     "show_vitons": "SELECT * FROM vitons"
 }
+
+
+def get_cloth_id_by_name(cloth_name):
+    # Replace 'your_username', 'your_password', 'your_database' with your actual credentials
+    connection = create_db_connection("localhost","root","Inno26489*","VITON")
+    cursor = connection.cursor()
+
+    try:
+        # Execute the SELECT query to retrieve cloth_id based on cloth_name
+        query = "SELECT cloth_id FROM clothes WHERE cloth_path = %s"
+        cursor.execute(query, (cloth_name,))
+
+        # Fetch the result
+        result = cursor.fetchone()
+
+        if result:
+            cloth_id = result[0]
+            return cloth_id
+        else:
+            print(f"No cloth found with name: {cloth_name}")
+            return None
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return None
+
+    finally:
+        cursor.close()
+        connection.close()
+
+def get_image_id_by_name(image_name):
+    # Replace 'your_username', 'your_password', 'your_database' with your actual credentials
+    connection = create_db_connection("localhost","root","Inno26489*","VITON")
+    cursor = connection.cursor()
+
+    try:
+        # Execute the SELECT query to retrieve cloth_id based on cloth_name
+        query = "SELECT cloth_id FROM clothes WHERE img_path = %s"
+        cursor.execute(query, (image_name,))
+
+        # Fetch the result
+        result = cursor.fetchone()
+
+        if result:
+            cloth_id = result[0]
+            return cloth_id
+        else:
+            print(f"No cloth found with name: {image_name}")
+            return None
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return None
+
+    finally:
+        cursor.close()
+        connection.close()
 
 def setup_DB():
 
@@ -161,8 +206,8 @@ def setup_DB():
 
 # conn = setup_DB()#create_db_connection("localhost","root","Inno26489*","VITON")#
 # insert_rows(conn, table_name, columns, data)
-# show_tables(conn, my_queries["show_images"])
-# delete_all_rows(conn,"images")
+# show_tables(images_table_name)
+# delete_all_rows("images")
 # show_tables(conn, my_queries["show_images"])
 
 # cursor.close()

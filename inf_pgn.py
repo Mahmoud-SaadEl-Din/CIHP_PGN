@@ -38,7 +38,7 @@ argp.add_argument('-o',
 
 args = argp.parse_args()
 
-def infere_parser(in_path, out_):
+def infere_parser(in_path="datalake_folder/image", out_="datalake_folder/image-parse-v3"):
     start = time.time()
     base = in_path
     image_list_inp = []

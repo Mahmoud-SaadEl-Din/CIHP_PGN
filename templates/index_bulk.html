@@ -149,17 +149,7 @@
 
         function SV() {
             document.getElementById('loading').style.display = 'block';
-            fetch('http://62.67.51.161:5000/route_for_button_8')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('loading').style.display = 'none';
-                    console.log('Received data:', data); 
-                    
-                })
-                .catch(error => {
-                   console.error('Fetch error:', error); // Log fetch errors
-                   document.getElementById('loading').style.display = 'none';
-                });
+            fetch('http://62.67.51.161:5000/run_SV');
         }
 
 

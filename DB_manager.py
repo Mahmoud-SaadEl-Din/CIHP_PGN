@@ -22,7 +22,7 @@ CREATE TABLE vitons (
   viton_id INT AUTO_INCREMENT PRIMARY KEY,
   image_id INT NOT NULL,
   cloth_id INT NOT NULL,
-  viton_path VARCHAR(40) NOT NULL,
+  viton_path VARCHAR(200) NOT NULL,
   register_time DATE
   );
  """
@@ -170,7 +170,7 @@ def get_image_id_by_name(image_name):
 
     try:
         # Execute the SELECT query to retrieve cloth_id based on cloth_name
-        query = "SELECT cloth_id FROM clothes WHERE img_path = %s"
+        query = "SELECT image_id FROM images WHERE img_path = %s"
         cursor.execute(query, (image_name,))
 
         # Fetch the result
@@ -191,6 +191,31 @@ def get_image_id_by_name(image_name):
         cursor.close()
         connection.close()
 
+def drop_all_tables():
+    # Replace 'your_username', 'your_password', 'your_database' with your actual credentials
+    connection = create_db_connection("localhost","root","Inno26489*","VITON")
+
+    cursor = connection.cursor()
+
+    try:
+        # Get a list of all tables in the database
+        cursor.execute("SHOW TABLES")
+        tables = cursor.fetchall()
+
+        # Drop each table
+        for table in tables:
+            table_name = table[0]
+            cursor.execute(f"DROP TABLE {table_name}")
+
+        print("All tables dropped successfully.")
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+    finally:
+        cursor.close()
+        connection.close()
+
 def setup_DB():
 
     created = True
@@ -199,6 +224,7 @@ def setup_DB():
         create_database(DB, my_queries["create"])
     else:
         DB = create_db_connection("localhost","root","Inno26489*","VITON")
+        drop_all_tables()
         execute_query(DB, create_images_table)
         execute_query(DB, create_clothes_table)
         execute_query(DB, create_vitons_table)
@@ -206,7 +232,13 @@ def setup_DB():
 
 # conn = setup_DB()#create_db_connection("localhost","root","Inno26489*","VITON")#
 # insert_rows(conn, table_name, columns, data)
-# show_tables(images_table_name)
+# DB = create_db_connection("localhost","root","Inno26489*","VITON")
+show_tables(images_table_name)
+show_tables(clothes_table_name)
+show_tables(vitons_table_name)
+# execute_query(DB, "DROP TABLE vitons")
+# execute_query(DB, create_vitons_table)
+
 # delete_all_rows("images")
 # show_tables(conn, my_queries["show_images"])
 

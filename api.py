@@ -40,7 +40,7 @@ def allowed_file(filename):
 
 @app.route('/serve_images/<path:filename>')
 def serve_images(filename):
-    return send_from_directory('datasets/HR_VITON_group', filename)
+    return send_from_directory('/dev/MY_DB/viton_results', filename)
 
 @app.route('/serve_images_stable/<path:filename>')
 def serve_images_stable(filename):
@@ -52,15 +52,17 @@ def upload_image():
     type = request.form['type']
     root = ""
     if type == 'SV':
-        root = "/dev/MY_DB/vitons_results"
+        root = "/dev/MY_DB/viton_results"
     
     uploaded_image = request.files['image']
     uploaded_file_name = request.form['path']
     uploaded_image.save(join(root,uploaded_file_name))  # Save the image to a file
     if type =='SV':
-        tmp = uploaded_file_name[:-4].split("_")
-        image_name, cloth_name = tmp[0], tmp[1]
+        tmp = uploaded_file_name[:-4].split("**")
+        image_name, cloth_name = tmp[0]+".png", tmp[1]+".png"
+        print(image_name, cloth_name)
         to_DB = [get_image_id_by_name(image_name), get_cloth_id_by_name(cloth_name),uploaded_file_name]
+        print("check here",to_DB)
         vitons_table_columns = ["image_id","cloth_id","viton_path"]
         vitons_table_name = 'vitons'
         insert_rows(vitons_table_name,vitons_table_columns,[to_DB])
@@ -85,15 +87,16 @@ def prerequiste():
     # Fetch data for button 1 (replace this with your logic)
     start = time.time()
     #step #1
-    count = 5#infere_parser()
+    count = infere_parser()
     # # step 2
-    # detectron_poses()
-    # #step 3
-    # gray_agnostic()
-    # #step 4
-    # detectron_densepose()
+    detectron_poses()
+    #step 3
+    gray_agnostic()
+    #step 4
+    detectron_densepose()
     #step 5
     save_to_DB_all_prerequesite()
+    clear_all()
 
     end = time.time()
     print(count)
@@ -132,8 +135,8 @@ def get_all__stable_images():
     # Fetch image paths from your server or database dynamically
     # This is just an example; replace it with your actual logic
     print("recieved the request")
-    image_folder = 'samples/unpair'  # Change this to your actual image folder path
-    image_paths = [f'/serve_images_stable/{img}' for img in os.listdir(image_folder)]
+    image_folder = '/dev/MY_DB/viton_results'  # Change this to your actual image folder path
+    image_paths = [f'/dev/MY_DB/viton_results/{img}' for img in os.listdir(image_folder)]
     print("recieved the request with images", image_paths)
     return jsonify({'imagePaths': image_paths})
 
@@ -150,11 +153,18 @@ def upload_person():
     for file in uploaded_files:
         # Save or process each file
         image_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')+ "_" +file.filename.split("/")[-1]
-        file.save('datalake_folder/image/' + image_name)
-        file.save('/dev/MY_DB/image/' + image_name)        
-        images.append([image_name])
+        png_name = ''.join(image_name.split(".")[:-1]) + ".png"
 
-        send_to_diffusion2(join("datalake_folder", "image", image_name),"person")
+        p1 = join('datalake_folder/image/', png_name)
+        p2 = join('/dev/MY_DB/image/', png_name)
+        file.save(p1)
+        img = cv2.imread(p1)
+        cv2.imwrite(p1,img)
+
+        shutil.copy(p1,p2)        
+        images.append([png_name])
+
+        send_to_diffusion2(join("datalake_folder", "image", png_name),"person")
         c+=1
 
     # TODO: to be added for the database
@@ -172,16 +182,38 @@ def upload_cloth():
     for file in uploaded_files:
         # Save or process each file
         image_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')+ "_" +file.filename.split("/")[-1]
-        file.save('datalake_folder/cloth/' + image_name)
-        file.save('/dev/MY_DB/cloth/' + image_name)        
-        clothes.append([image_name])
+        png_name = ''.join(image_name.split(".")[:-1]) + ".png"
 
-        send_to_diffusion2(join("datalake_folder", "cloth", image_name),"cloth")
+        p1 = join('datalake_folder/cloth/', png_name)
+        p2 = join('/dev/MY_DB/cloth/', png_name)
+        file.save(p1)
+        img = cv2.imread(p1)
+        cv2.imwrite(p1,img)
+
+        shutil.copy(p1,p2)        
+        clothes.append([png_name])
+
+        send_to_diffusion2(join("datalake_folder", "cloth", png_name),"cloth")
 
         c+=1
     # TODO: to be added for the database
     insert_rows(clothes_table_name,clothes_table_columns,clothes)  
     return jsonify({'text': f'{c} cloth images uploaded successfully'})
 
+
+
+def clear_all():
+    main_folder = "datalake_folder"
+    
+    l = ['image', 'image-parse-v3','image-parse-agnostic-v3.2', 'agnostic-v3.2', 'openpose_img', 'openpose_json','agnostic-v3.2','image-densepose']
+    for name in l:
+        shutil.rmtree(join(main_folder, name))
+        os.mkdir(join(main_folder, name))
+    l = ["cloth", "cloth-mask"]
+    for name in l:     
+        shutil.rmtree(join(main_folder, name))
+        os.mkdir(join(main_folder, name))
+
 if __name__ == '__main__':
+    clear_all()
     app.run(debug=True, host="0.0.0.0", port=5903)

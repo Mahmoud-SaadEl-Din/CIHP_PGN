@@ -9,6 +9,12 @@ from get_parse_agnostic import get_im_parse_agnostic_original,get_img_agnostic_h
 from self_visualized import infer_densepose
 from keypoints_detectron2 import pose_dir
 
+
+def ask_server2_to_diffuse():
+    response = requests.post("http://62.67.51.161:5000/run_SV")
+    return response
+
+
 def send_to_diffusion2(image_path, txt):
     # URL of the GPU server where you'll upload the image
     gpu_server_url = 'http://62.67.51.161:5000/upload'  # Replace with your GPU server's URL

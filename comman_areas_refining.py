@@ -6,28 +6,26 @@ import numpy as np
 def conditional_merge(im_rgb_diffused,im_rgb_originnal,im_parse=None):
     print(im_parse.shape)
     print(im_rgb_originnal.shape, im_rgb_diffused.shape)
-    im_rgb_originnal[im_parse==5] = im_rgb_diffused[im_parse==5]
-    im_rgb_originnal[im_parse==6] = im_rgb_diffused[im_parse==6]
-    im_rgb_originnal[im_parse==14] = im_rgb_diffused[im_parse==14]
-    im_rgb_originnal[im_parse==15] = im_rgb_diffused[im_parse==15]
+    wanted_ids = [1,2,3,4,13]
+    for id in wanted_ids:
+        im_rgb_diffused[im_parse==id] = im_rgb_originnal[im_parse==id]
+
     
 
-    return im_rgb_originnal
+    return im_rgb_diffused
 
 
 
-def take_diffused_tshist_to_original(diffused_imgs,parsed_diffused,original_img,out_dir):
-    images_dict = {image.split(".")[0]:image for image in os.listdir(original_img)}
-    for image in os.listdir(diffused_imgs):
-        ori_img = cv2.imread(join(original_img, images_dict[image.split("_")[0]]))
-        ori_img = cv2.resize(ori_img,(384,512))
-        diffused_img = cv2.imread(join(diffused_imgs,image))
-        with open(join(parsed_diffused, image.replace(".jpg","_vis2.npy")), 'rb') as f:
-            im_parse_np = np.load(f)
-        cv2.imwrite(join(out_dir,image), conditional_merge(diffused_img,ori_img,im_parse_np))
-        print(f'Stitched and saved: {image}')
+def take_face_from_original_to_diffusion(generated_image_name, original_img_name):
+    
+    ori_img = cv2.imread(join("/dev/MY_DB/image", original_img_name))
+    ori_img = cv2.resize(ori_img,(384,512))
+    diffused_img = cv2.imread(join("/dev/MY_DB/viton_results",generated_image_name))
+    with open(join("/dev/MY_DB/image-parse-v3", original_img_name.replace(".png","_vis2.npy")), 'rb') as f:
+        im_parse_np = np.load(f)
+    cv2.imwrite(join("/dev/MY_DB/viton_results",generated_image_name), conditional_merge(diffused_img,ori_img,im_parse_np))
+    print(f'Stitched and saved: {generated_image_name}')
 
-    print('Conditional Merge complete!')
     
 
 

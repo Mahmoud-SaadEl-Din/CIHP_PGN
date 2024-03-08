@@ -8,7 +8,7 @@ from os.path import join
 import time
 from flask import send_from_directory
 
-from api_functions import gray_agnostic, detectron_densepose, detectron_poses, send_to_diffusion2
+from api_functions import gray_agnostic, detectron_densepose, detectron_poses, send_to_diffusion2,ask_server2_to_diffuse
 from comman_areas_refining import *
 from DB_manager import insert_rows,clothes_table_columns,clothes_table_name,images_table_columns_v2,images_table_name, get_cloth_id_by_name,get_image_id_by_name
 from datetime import datetime
@@ -60,6 +60,7 @@ def upload_image():
     if type =='SV':
         tmp = uploaded_file_name[:-4].split("**")
         image_name, cloth_name = tmp[0]+".png", tmp[1]+".png"
+        take_face_from_original_to_diffusion(uploaded_file_name,image_name)
         print(image_name, cloth_name)
         to_DB = [get_image_id_by_name(image_name), get_cloth_id_by_name(cloth_name),uploaded_file_name]
         print("check here",to_DB)
@@ -82,6 +83,30 @@ def index_bulk():
     return render_template('index_bulk.html')
 
 
+
+@app.route('/diffuse/<int:person_id>/<int:cloth_id>')
+def your_route_handler(person_id, cloth_id):
+    # Your route handling logic here
+    p_name, c_name = get_image_id_by_name(person_id), get_cloth_id_by_name(cloth_id)
+    if p_name != None:
+        #send data to server 2
+        count = infere_parser()
+        # # step 2
+        detectron_poses()
+        #step 3
+        gray_agnostic()
+        #step 4
+        detectron_densepose()
+    if c_name !=None:
+        # send cloth to server 2
+        send_to_diffusion2(join("datalake_folder", "cloth", png_name),"cloth")
+    
+    #send request to server 2 to work on them
+    ask_server2_to_diffuse()
+        
+    return f'ID 1: {id1}, ID 2: {id2}'
+
+
 @app.route('/prerequiste')
 def prerequiste():
     # Fetch data for button 1 (replace this with your logic)
@@ -102,29 +127,6 @@ def prerequiste():
     print(count)
     data = {
         "text": f"processed {count} images in {round((end-start),2)} seconds",
-    }
-    print(data)
-    return jsonify(data)
-
-
-@app.route('/post_processing')
-def post_processing():
-    # Fetch data for button 1 (replace this with your logic)
-    start = time.time()
-    if len(os.listdir("samples/unpair")) != len(os.listdir("datalake_folder/image"))*len(os.listdir("datalake_folder/cloth")):
-        data = {
-            "text": f"NUM of {len(os.listdir('samples/unpair'))} images mismatch number of pairs {len(os.listdir('datalake_folder/image'))*len(os.listdir('datalake_folder/cloth'))}"
-        }
-        print(data)
-        return jsonify(data)
-
-
-    remove_gray_area(parsed_original_imgs="datalake_folder/image-parse-v3", diffused_imgs="samples/unpair",original_imgs_path="datalake_folder/image",out_path="postprocessing/no_gray")
-    infere_parser("postprocessing/no_gray","postprocessing/parsed")
-    take_diffused_tshist_to_original("postprocessing/no_gray","postprocessing/parsed","datalake_folder/image","postprocessing/final")
-    end = time.time()
-    data = {
-        "text": f"processed {len(os.listdir('postprocessing/final'))} images in {round((end-start),2)} seconds"
     }
     print(data)
     return jsonify(data)
@@ -159,6 +161,7 @@ def upload_person():
         p2 = join('/dev/MY_DB/image/', png_name)
         file.save(p1)
         img = cv2.imread(p1)
+        img = cv2.resize(img,(384,512))
         cv2.imwrite(p1,img)
 
         shutil.copy(p1,p2)        
@@ -188,6 +191,7 @@ def upload_cloth():
         p2 = join('/dev/MY_DB/cloth/', png_name)
         file.save(p1)
         img = cv2.imread(p1)
+        img = cv2.resize(img,(384,512))
         cv2.imwrite(p1,img)
 
         shutil.copy(p1,p2)        

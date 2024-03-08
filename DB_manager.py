@@ -163,6 +163,35 @@ def get_cloth_id_by_name(cloth_name):
         cursor.close()
         connection.close()
 
+def get_cloth_name_by_id(id):
+    # Replace 'your_username', 'your_password', 'your_database' with your actual credentials
+    connection = create_db_connection("localhost","root","Inno26489*","VITON")
+    cursor = connection.cursor()
+
+    try:
+        # Execute the SELECT query to retrieve cloth_id based on cloth_name
+        query = "SELECT cloth_path FROM clothes WHERE cloth_id = %s"
+        cursor.execute(query, (id,))
+
+        # Fetch the result
+        result = cursor.fetchone()
+
+        if result:
+            cloth_id = result[0]
+            return cloth_id
+        else:
+            print(f"No cloth found with id: {id}")
+            return None
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return None
+
+    finally:
+        cursor.close()
+        connection.close()
+
+
 def get_image_id_by_name(image_name):
     # Replace 'your_username', 'your_password', 'your_database' with your actual credentials
     connection = create_db_connection("localhost","root","Inno26489*","VITON")
@@ -180,7 +209,36 @@ def get_image_id_by_name(image_name):
             cloth_id = result[0]
             return cloth_id
         else:
-            print(f"No cloth found with name: {image_name}")
+            print(f"No image found with name: {image_name}")
+            return None
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return None
+
+    finally:
+        cursor.close()
+        connection.close()
+
+
+def get_image_name_by_id(id):
+    # Replace 'your_username', 'your_password', 'your_database' with your actual credentials
+    connection = create_db_connection("localhost","root","Inno26489*","VITON")
+    cursor = connection.cursor()
+
+    try:
+        # Execute the SELECT query to retrieve cloth_id based on cloth_name
+        query = "SELECT img_path FROM images WHERE image_id = %s"
+        cursor.execute(query, (id,))
+
+        # Fetch the result
+        result = cursor.fetchone()
+
+        if result:
+            cloth_id = result[0]
+            return cloth_id
+        else:
+            print(f"No image found with id: {id}")
             return None
 
     except mysql.connector.Error as err:

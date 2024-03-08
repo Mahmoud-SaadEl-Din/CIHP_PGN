@@ -60,25 +60,19 @@
     <div class="row">
         <div class="col">
             <div class="mb-3">
-                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="select_poses()">On-need: Filter image by poses</button>
+                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="select_poses()">Filter poses</button>
                 <div id="content1"></div>
             </div>
         </div>
         <div class="col">
             <div class="mb-3">
-                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="prerequiste()">Step (1): STABLE VITON pre-requesit</button>
+                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="prerequiste()">Extract Person features</button>
                 <div id="content1"></div>
             </div>
         </div>
         <div class="col">
             <div class="mb-3">
-                <button class="btn btn-danger btn-lg mb-3" style="width: 160px; height: 200px;" onclick="SV()">NEW: STABLE VITON</button>
-                <div id="content8"></div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="mb-3">
-                <button class="btn btn-danger btn-lg mb-3" style="width: 160px; height: 200px;" onclick="postprocessing()">Refine: STABLE VITON</button>
+                <button class="btn btn-danger btn-lg mb-3" style="width: 160px; height: 200px;" onclick="SV()">Try cloth on person</button>
                 <div id="content8"></div>
             </div>
         </div>
@@ -152,22 +146,6 @@
             fetch('http://62.67.51.161:5000/run_SV');
             document.getElementById('loading').style.display = 'none';
 
-        }
-
-
-        function postprocessing() {
-            document.getElementById('loading').style.display = 'block';
-            fetch('/post_processing')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('loading').style.display = 'none';
-                    console.log('Received data:', data); 
-                    
-                })
-                .catch(error => {
-                   console.error('Fetch error:', error); // Log fetch errors
-                   document.getElementById('loading').style.display = 'none';
-                });
         }
 
         function prerequesite(){

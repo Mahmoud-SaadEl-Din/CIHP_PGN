@@ -87,16 +87,16 @@ def index_bulk():
 @app.route('/diffuse/<int:person_id>/<int:cloth_id>')
 def your_route_handler(person_id, cloth_id):
     # Your route handling logic here
-    # p_name, c_name = get_image_name_by_id(person_id), get_cloth_name_by_id(cloth_id)
-    # if p_name != None:
-    #     send_to_diffusion2(join("/dev/MY_DB", "image", p_name),"person")
-    #     #send data to server 2
-    #     gray_agnostic(by_name=p_name)
-    #     #step 4
-    #     detectron_densepose(by_name=p_name)
-    # if c_name !=None:
-    #     # send cloth to server 2
-    #     send_to_diffusion2(join("/dev/MY_DB", "cloth", c_name),"cloth")
+    p_name, c_name = get_image_name_by_id(person_id), get_cloth_name_by_id(cloth_id)
+    if p_name != None:
+        send_to_diffusion2(join("/dev/MY_DB", "image", p_name),"person")
+        #send data to server 2
+        gray_agnostic(by_name=p_name,send=True)
+        #step 4
+        detectron_densepose(by_name=p_name,send=True)
+    if c_name !=None:
+        # send cloth to server 2
+        send_to_diffusion2(join("/dev/MY_DB", "cloth", c_name),"cloth")
     
     #send request to server 2 to work on them
     ask_server2_to_diffuse()
@@ -108,9 +108,12 @@ def your_route_handler(person_id, cloth_id):
     return jsonify(data)
 
 
-@app.route('/prerequiste')
-def prerequiste():
+@app.route('/prerequiste/<int:person_id>')
+def prerequiste(person_id):
     # Fetch data for button 1 (replace this with your logic)
+    p_name = get_image_name_by_id(person_id)
+    clear_all()
+    shutil.copy(join("/dev/MY_DB", "image", p_name), join("datalake_folder","image",p_name))
     start = time.time()
     #step #1
     count = infere_parser()
@@ -150,7 +153,6 @@ def get_all__stable_images():
 def upload_person():
     uploaded_files = request.files.getlist('person_images')
     print(uploaded_files)
-    c = 0
     images = []
     # Process the uploaded files (you can loop through the files and handle them as needed)
     for file in uploaded_files:
@@ -168,19 +170,15 @@ def upload_person():
         shutil.copy(p1,p2)        
         images.append([png_name])
 
-        send_to_diffusion2(join("datalake_folder", "image", png_name),"person")
-        c+=1
-
     # TODO: to be added for the database
-    insert_rows(images_table_name,images_table_columns_v2,images)
-    return jsonify({'text': f'{c} Person images uploaded successfully'})
+    ids = insert_rows(images_table_name,images_table_columns_v2,images)
+    return jsonify({'text': f'{ids} Person images uploaded successfully'})
         
 
 # Define a route for handling image uploads
 @app.route('/upload_cloth', methods=['POST'])
 def upload_cloth():
     uploaded_files = request.files.getlist('cloth_images')
-    c= 0
     clothes = []
     # Process the uploaded files (you can loop through the files and handle them as needed)
     for file in uploaded_files:
@@ -198,12 +196,9 @@ def upload_cloth():
         shutil.copy(p1,p2)        
         clothes.append([png_name])
 
-        send_to_diffusion2(join("datalake_folder", "cloth", png_name),"cloth")
-
-        c+=1
     # TODO: to be added for the database
-    insert_rows(clothes_table_name,clothes_table_columns,clothes)  
-    return jsonify({'text': f'{c} cloth images uploaded successfully'})
+    ids = insert_rows(clothes_table_name,clothes_table_columns,clothes)  
+    return jsonify({'text': f'{ids} cloth images uploaded successfully'})
 
 
 

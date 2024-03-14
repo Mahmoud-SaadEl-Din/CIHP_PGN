@@ -95,12 +95,15 @@ def insert_rows(table_name, columns, data):
     # Prepare SQL query
     query = f"INSERT INTO {table_name} ({', '.join(columns)}) VALUES ({', '.join(['%s']*len(columns))})"
 
+    inserted_ids = {}
     # Execute SQL query for each row in the data
     for row in data:
         cursor.execute(query, row)
+        inserted_ids[row[0]] = cursor.lastrowid
 
     # Commit changes and close connection
     connection.commit()
+    return inserted_ids
 
 def delete_all_rows(table_name):
     conn = create_db_connection("localhost","root","Inno26489*","VITON")

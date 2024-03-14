@@ -67,7 +67,7 @@ def mask_agnostic():
     }
     return data
 
-def gray_agnostic(by_name=""):
+def gray_agnostic(by_name="", send = False):
     # Fetch data for button 1 (replace this with your logic)
     start = time.time()
     if by_name != "":
@@ -87,9 +87,9 @@ def gray_agnostic(by_name=""):
         agnostic.save(out_path)
         print(type(binary))
         binary.save(f"datalake_folder/agnostic-mask/{im_name}")
-        
-        send_to_diffusion2(join("datalake_folder", "agnostic-v3.2", im_name),"agnostic_gray")
-        send_to_diffusion2(join("datalake_folder", "agnostic-mask", im_name),"cloth_mask")
+        if send:
+            send_to_diffusion2(join("datalake_folder", "agnostic-v3.2", im_name),"agnostic_gray")
+            send_to_diffusion2(join("datalake_folder", "agnostic-mask", im_name),"cloth_mask")
         
     end = time.time()
     data = {
@@ -110,7 +110,7 @@ def detectron_poses():
 
     return data
 
-def detectron_densepose(by_name=""):
+def detectron_densepose(by_name="",send=False):
     # Fetch data for button 5 (replace this with your logic)
     start = time.time()
     if by_name != "":
@@ -119,8 +119,9 @@ def detectron_densepose(by_name=""):
     images_dir = "datalake_folder/image"
     out_dir = "datalake_folder/image-densepose"
     infer_densepose(images_dir,out_dir)
-    for image_name in os.listdir(out_dir):
-        send_to_diffusion2(join("datalake_folder", "image-densepose", image_name),"densepose")
+    if send:
+        for image_name in os.listdir(out_dir):
+            send_to_diffusion2(join("datalake_folder", "image-densepose", image_name),"densepose")
     end = time.time()
     data = {
         "text": f"processed {len(os.listdir(out_dir))} images in {round((end-start),2)} seconds"

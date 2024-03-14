@@ -11,7 +11,7 @@ from keypoints_detectron2 import pose_dir
 
 
 def ask_server2_to_diffuse():
-    response = requests.post("http://62.67.51.161:5000/run_SV")
+    response = requests.get("http://62.67.51.161:5000/run_SV")
     return response
 
 
@@ -67,9 +67,13 @@ def mask_agnostic():
     }
     return data
 
-def gray_agnostic():
+def gray_agnostic(by_name=""):
     # Fetch data for button 1 (replace this with your logic)
     start = time.time()
+    if by_name != "":
+        send_to_diffusion2(join("/dev/MY_DB/", "agnostic-v3.2", by_name),"agnostic_gray")
+        send_to_diffusion2(join("/dev/MY_DB/", "agnostic-mask", by_name),"cloth_mask")
+        return
     images_dir = "datalake_folder/image"
     out_dir = join("datalake_folder","agnostic-v3.2")
     for im_name in os.listdir(images_dir):
@@ -106,9 +110,12 @@ def detectron_poses():
 
     return data
 
-def detectron_densepose():
+def detectron_densepose(by_name=""):
     # Fetch data for button 5 (replace this with your logic)
     start = time.time()
+    if by_name != "":
+        send_to_diffusion2(join("/dev/MY_DB", "image-densepose", by_name),"densepose")
+        return
     images_dir = "datalake_folder/image"
     out_dir = "datalake_folder/image-densepose"
     infer_densepose(images_dir,out_dir)

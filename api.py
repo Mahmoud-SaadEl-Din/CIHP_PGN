@@ -10,7 +10,7 @@ from flask import send_from_directory
 
 from api_functions import gray_agnostic, detectron_densepose, detectron_poses, send_to_diffusion2,ask_server2_to_diffuse
 from comman_areas_refining import *
-from DB_manager import insert_rows,clothes_table_columns,clothes_table_name,images_table_columns_v2,images_table_name, get_cloth_id_by_name,get_image_id_by_name
+from DB_manager import insert_rows,clothes_table_columns,clothes_table_name,images_table_columns_v2,images_table_name, get_cloth_id_by_name,get_image_id_by_name, get_cloth_name_by_id, get_image_name_by_id
 from datetime import datetime
 from distutils.dir_util import copy_tree
 app = Flask(__name__)
@@ -87,24 +87,25 @@ def index_bulk():
 @app.route('/diffuse/<int:person_id>/<int:cloth_id>')
 def your_route_handler(person_id, cloth_id):
     # Your route handling logic here
-    p_name, c_name = get_image_id_by_name(person_id), get_cloth_id_by_name(cloth_id)
-    if p_name != None:
-        #send data to server 2
-        count = infere_parser()
-        # # step 2
-        detectron_poses()
-        #step 3
-        gray_agnostic()
-        #step 4
-        detectron_densepose()
-    if c_name !=None:
-        # send cloth to server 2
-        send_to_diffusion2(join("datalake_folder", "cloth", png_name),"cloth")
+    # p_name, c_name = get_image_name_by_id(person_id), get_cloth_name_by_id(cloth_id)
+    # if p_name != None:
+    #     send_to_diffusion2(join("/dev/MY_DB", "image", p_name),"person")
+    #     #send data to server 2
+    #     gray_agnostic(by_name=p_name)
+    #     #step 4
+    #     detectron_densepose(by_name=p_name)
+    # if c_name !=None:
+    #     # send cloth to server 2
+    #     send_to_diffusion2(join("/dev/MY_DB", "cloth", c_name),"cloth")
     
     #send request to server 2 to work on them
     ask_server2_to_diffuse()
-        
-    return f'ID 1: {id1}, ID 2: {id2}'
+
+    data = {
+        "text": f"Working with IDs",
+    }
+    print(data)
+    return jsonify(data)
 
 
 @app.route('/prerequiste')

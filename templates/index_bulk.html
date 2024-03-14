@@ -66,7 +66,7 @@
         </div>
         <div class="col">
             <div class="mb-3">
-                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="prerequiste()">Extract Person features</button>
+                <button class="btn btn-primary btn-lg mb-3" style="width: 160px; height: 200px;" onclick="prerequiste2()">Extract Person features</button>
                 <div id="content1"></div>
             </div>
         </div>
@@ -148,12 +148,8 @@
 
         }
 
-        function prerequesite(){
-            if (buttonNumber === 8) {
-                processResponse(buttonNumber, `http://62.67.51.161:5000/route_for_button_${buttonNumber}`);
-            } else {
-                processResponse(buttonNumber, `/route_for_button_${buttonNumber}`);
-            }
+        function prerequiste2(){
+            fetch('/diffuse/1/1')
         }
         
 

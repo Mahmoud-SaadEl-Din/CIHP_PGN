@@ -8,7 +8,7 @@ from os.path import join
 import time
 from flask import send_from_directory
 
-from api_functions import gray_agnostic, detectron_densepose, detectron_poses, send_to_diffusion2,ask_server2_to_diffuse
+from api_functions import gray_agnostic, detectron_densepose, detectron_poses, send_to_diffusion2,ask_server2_to_diffuse,poses_classification_with_sm
 from comman_areas_refining import *
 from DB_manager import insert_rows,clothes_table_columns,clothes_table_name,images_table_columns_v2,images_table_name, get_cloth_id_by_name,get_image_id_by_name, get_cloth_name_by_id, get_image_name_by_id
 from datetime import datetime
@@ -74,7 +74,7 @@ def upload_image():
 # Define a route for the home page
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index_bulk.html')
 
 
 # Define a route for the home page
@@ -147,6 +147,31 @@ def get_all__stable_images():
     return jsonify({'imagePaths': image_paths})
 
 
+# Define a route for handling image uploads
+@app.route('/classify_pose', methods=['POST'])
+def classify_pose():
+    uploaded_files = request.files.getlist('person_images')
+    print(uploaded_files)
+    images = []
+    clear_cache_poses()
+    # Process the uploaded files (you can loop through the files and handle them as needed)
+    for file in uploaded_files:
+        # Save or process each file
+        image_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')+ "_" +file.filename.split("/")[-1]
+        png_name = ''.join(image_name.split(".")[:-1]) + ".png"
+
+        p1 = join('temp_poses/imgs', png_name)
+        file.save(p1)
+        img = cv2.imread(p1)
+        # img = cv2.resize(img,(384,512))
+        cv2.imwrite(p1,img)
+    
+    detectron_poses('temp_poses/imgs','temp_poses/poses_imgs','temp_poses/poses_json')
+    
+    names, prob, class_ = poses_classification_with_sm()
+    clear_cache_poses()
+    return jsonify({'text': f'{names},{prob}, {class_} poses'})
+    
 
 # Define a route for handling image uploads
 @app.route('/upload_person', methods=['POST'])
@@ -211,6 +236,14 @@ def clear_all():
         os.mkdir(join(main_folder, name))
     l = ["cloth", "cloth-mask"]
     for name in l:     
+        shutil.rmtree(join(main_folder, name))
+        os.mkdir(join(main_folder, name))
+
+def clear_cache_poses():
+    main_folder = "temp_poses"
+    
+    l = ['imgs', 'poses_imgs','poses_json']
+    for name in l:
         shutil.rmtree(join(main_folder, name))
         os.mkdir(join(main_folder, name))
 

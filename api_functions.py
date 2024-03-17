@@ -4,11 +4,13 @@ import numpy as np
 from PIL import Image
 import time
 import requests
-
+import cv2
+import pandas as pd
 from get_parse_agnostic import get_im_parse_agnostic_original,get_img_agnostic_human2, read_pose_parse_detectron2
 from self_visualized import infer_densepose
 from keypoints_detectron2 import pose_dir
-
+import statsmodels.api as sm 
+from sklearn.model_selection import train_test_split
 
 def ask_server2_to_diffuse():
     response = requests.get("http://62.67.51.161:5000/run_SV")
@@ -97,10 +99,7 @@ def gray_agnostic(by_name="", send = False):
     }
     return data
 
-def detectron_poses():
-    in_dir = "/root/diffusion_root/CIHP_PGN/datalake_folder/image"
-    out_dir = "/root/diffusion_root/CIHP_PGN/datalake_folder/openpose_img"
-    json_dir = "/root/diffusion_root/CIHP_PGN/datalake_folder/openpose_json"
+def detectron_poses(in_dir="datalake_folder/image",out_dir="datalake_folder/openpose_img", json_dir="datalake_folder/openpose_json"):
     start = time.time()
     pose_dir(in_dir, out_dir, json_dir)
     end = time.time()
@@ -127,4 +126,42 @@ def detectron_densepose(by_name="",send=False):
         "text": f"processed {len(os.listdir(out_dir))} images in {round((end-start),2)} seconds"
         }
     return data
+
+def normalize_pose(r,image_name):
+    results = [f"{image_name}"]
+    h, w, channel = cv2.imread(f"{r}/imgs/{image_name}").shape
+    with open(f"{r}/poses_json/{image_name.split('.')[0]}.npy", 'rb') as f:
+        pose_data = np.load(f)
+        pose_data = pose_data.reshape((-1, 3))[:, :2]
+        for pairs in pose_data:
+            norm_x, norm_y = round(pairs[0]/w ,2), round(pairs[1]/h, 2)
+            results.extend([norm_x,norm_y])
+    
+    return results
+
+
+def poses_classification_with_sm(root='temp_poses'):
+    a = []
+    for image_name in os.listdir(join(root,"imgs")):
+        l = normalize_pose(root,image_name)
+        a.append(l)    
+    df = pd.DataFrame(a)
+ 
+    # defining the dependent and independent variables 
+    X_train = df
+
+    # Splitting the data into train and test
+    X_train_name = X_train[X_train.columns[0]].tolist()
+    X_train = X_train.drop(X_train.columns[0], axis=1)
+   
+    log_reg = sm.regression.linear_model.OLSResults.load("Log_reg.pt")
+
+    yhat = log_reg.predict(X_train) 
+    prediction = list(map(round, yhat)) 
+    
+    return X_train_name, list(yhat), prediction
+
+
+
+
 

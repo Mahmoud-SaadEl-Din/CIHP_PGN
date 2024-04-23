@@ -42,9 +42,11 @@ def infere_parser(in_path="datalake_folder/image", out_="datalake_folder/image-p
     start = time.time()
     base = in_path
     image_list_inp = []
-    for img in os.listdir(base):
+    diff = list(set(os.listdir(base)) - set(os.listdir(out_)))
+    print(f"remiaining {len(diff)} out of {len(os.listdir(base))}")
+    for img in diff:
         image_list_inp.append(join(base, img))
-    print(image_list_inp)
+    # print(image_list_inp)
    
 
     N_CLASSES = 20
@@ -73,7 +75,7 @@ def infere_parser(in_path="datalake_folder/image", out_="datalake_folder/image-p
     with tf.variable_scope('', reuse=False):
         net_100 = PGNModel({'data': image_batch050}, is_training=False, n_classes=N_CLASSES)
     end = time.time()
-    print(f"[Not Solved]first bottle neck {round((end-start)/ 60,2)} minutes")
+    # print(f"[Not Solved]first bottle neck {round((end-start)/ 60,2)} minutes")
     
     # parsing net
     parsing_out1_100 = net_100.layers['parsing_fc']
@@ -120,21 +122,26 @@ def infere_parser(in_path="datalake_folder/image", out_="datalake_folder/image-p
             
     threads = tf.train.start_queue_runners(coord=coord, sess=sess)
     end2 = time.time()
-    print(f"[Not solved]second bottle neck {round((end2-start2)/ 60,2)} minutes")
+    # print(f"[Not solved]second bottle neck {round((end2-start2)/ 60,2)} minutes")
     img_id = ""
     print("before start", NUM_STEPS)
-    for step in range(NUM_STEPS):
-        print("Started",step)
+    from tqdm import tqdm
+    for step in tqdm(range(NUM_STEPS)):
+        # print("Started",step)
         start = time.time()
         parsing_, scores = sess.run([pred_all, pred_scores])
         end = time.time()
-        print(f"[Solved]third bottle neck {round((end-start)/ 60,2)} minutes")
+        # print(f"[Solved]third bottle neck {round((end-start)/ 60,2)} minutes")
         img_split = image_list[step].split('/')
         img_id = img_split[-1][:-4]
 
         t =parsing_[0, :, :, 0]
-        with open('{}/{}_vis2.npy'.format(out_dir, img_id), 'wb') as f:
-            np.save(f, t)
+        try:
+            with open('{}/{}_vis2.npy'.format(out_dir, img_id), 'wb') as f:
+                np.save(f, t)
+        except:
+            print(f"error at {img_id}")
+            continue
 
         
         msk = decode_labels(parsing_, num_classes=N_CLASSES)
@@ -146,6 +153,7 @@ def infere_parser(in_path="datalake_folder/image", out_="datalake_folder/image-p
     
     coord.request_stop()
     coord.join(threads)
+    tf.reset_default_graph()
 
     return NUM_STEPS
     

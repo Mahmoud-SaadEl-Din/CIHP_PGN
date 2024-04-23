@@ -137,7 +137,7 @@ def get_img_agnostic_human2(img, parse, pose_data, color=(128, 128, 128),color_m
     # agnostic_draw.ellipse((pose_data[5][0],pose_data[5][1], pose_data[11][0],pose_data[11][1]), color, color)
     # agnostic_draw.ellipse((pose_data[6][0],pose_data[6][1], pose_data[12][0],pose_data[12][1]), color, color)
     # agnostic_draw.ellipse((pose_data[5][0],pose_data[5][1], pose_data[12][0],pose_data[12][1]), color, color)
-    print(pose_data[5])
+    # print(pose_data[5])
     pairs = [[5,6],[7,8],[9,10],[5,7],[7,9],[6,8],[8,10]]
     for i,j in pairs:
         shape = [tuple(pose_data[i]),tuple(pose_data[j])]

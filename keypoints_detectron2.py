@@ -41,14 +41,17 @@ def pose_image(image_path):
 
 
 def pose_dir(input_dir, out_dir, out_dir_json):
-    
-    for im_name in os.listdir(input_dir):
+    from tqdm import tqdm
+    for im_name in tqdm(os.listdir(input_dir), desc="work on keypoints poses.."):
         name = im_name.split(".")[0]
         # Make prediction
         image = cv2.imread(join(input_dir,im_name))
         outputs = predictor(image)
         # Extract predicted keypoints, scores, and classes
         keypoints = outputs["instances"].pred_keypoints.cpu().numpy()
+        if len(keypoints) == 0:
+            print("no keypoint detected at", im_name)
+            continue
         # Visualize predictions
         v = Visualizer(image[:, :, ::-1], metadata, scale=1)
         # v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
@@ -56,9 +59,11 @@ def pose_dir(input_dir, out_dir, out_dir_json):
         output_image = v.get_image()[:, :, ::-1]
         cv2.imwrite(join(out_dir,name+".png"), output_image)
 
-        with open(join(out_dir_json, name+".npy"), 'wb') as f:
-            np.save(f, keypoints[0])
-    
+        try:
+            with open(join(out_dir_json, name+".npy"), 'wb') as f:
+                np.save(f, keypoints[0])
+        except:
+            print(f"not working @", name)    
 
 
 def draw():

@@ -7,6 +7,7 @@ from carvekit.ml.wrap.tracer_b7 import TracerUniversalB7
 from carvekit.pipelines.postprocessing import MattingMethod
 from carvekit.pipelines.preprocessing import PreprocessingStub
 from carvekit.trimap.generator import TrimapGenerator
+from tqdm import tqdm
 
 
 # Check doc strings for more information
@@ -31,7 +32,7 @@ interface = Interface(pre_pipe=preprocessing,
 
 
 def infere_cloth_mask(root, out):
-
+    print("here")
     imgs = []
     for name in os.listdir(root):
         imgs.append(root + '/' + name)
@@ -44,7 +45,7 @@ def infere_cloth_mask(root, out):
         return idx
     
     images = interface(imgs)
-    for i, im in enumerate(images):
+    for i, im in tqdm(enumerate(images), desc="cloth-mask"):
         img = np.array(im)
         img = img[...,:3] # no transparency
         idx = get_bg_indx(img)
@@ -52,7 +53,7 @@ def infere_cloth_mask(root, out):
         img[idx] = 0
         im = Image.fromarray(np.uint8(img), 'L')
         im_name = f'{out}/{imgs[i].split("/")[-1].split(".")[0]}.png'
-        print(im_name)
+        # print(im_name)
         im.save(im_name)
 
     return len(images)

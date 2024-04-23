@@ -21,6 +21,8 @@ from densepose.vis.densepose_results import (
     DensePoseResultsVVisualizer,
 )
 
+from tqdm import tqdm
+
 cfg = get_cfg()
 add_densepose_config(cfg)
 
@@ -62,7 +64,7 @@ def predict(img):
     import time
     s = time.time()
     outputs = predictor(img)['instances']
-    print(f"finished in {time.time() - s}")
+    # print(f"finished in {time.time() - s}")
     image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     image = np.tile(image[:, :, np.newaxis], [1, 1, 3])
     data = extractor(outputs)
@@ -72,6 +74,6 @@ def predict(img):
 def infer_densepose(in_, out_):
     input_dir = in_
     output_dir = out_
-    for image in os.listdir(input_dir):
+    for image in tqdm(os.listdir(input_dir), desc="densepose.."):
         frame = cv2.imread(join(input_dir, image))
         cv2.imwrite(join(output_dir,image), predict(frame))

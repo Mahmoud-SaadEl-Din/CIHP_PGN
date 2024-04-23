@@ -12,6 +12,8 @@ from keypoints_detectron2 import pose_dir
 import statsmodels.api as sm 
 from sklearn.model_selection import train_test_split
 
+from tqdm import tqdm
+
 def ask_server2_to_diffuse():
     response = requests.get("http://62.67.51.161:5000/run_SV")
     return response
@@ -98,6 +100,20 @@ def gray_agnostic(by_name="", send = False):
         "text": f"processed {len(os.listdir(out_dir))} images in {round((end-start),2)} seconds"
     }
     return data
+
+def gray_agnostic_pure(in_):
+    for im_name in tqdm(os.listdir(join(in_,"images"))):
+        rgb_model = Image.open(join(in_, "images",im_name))
+        im_parse, im_parse_np, pose_data, parse_name, parse_name_npy = read_pose_parse_detectron2(in_,im_name)
+        if im_parse ==False:
+            print(f"{im_name} ==> OpenPose Json file is not exist")
+            continue
+        agnostic,binary = get_img_agnostic_human2(rgb_model, im_parse_np, pose_data)
+        out_path = join(in_,"agnostic", im_name)
+        agnostic.save(out_path)
+        # print(type(binary))
+        binary.save(f"{in_}/agnostic-mask/{im_name}")
+     
 
 def detectron_poses(in_dir="datalake_folder/image",out_dir="datalake_folder/openpose_img", json_dir="datalake_folder/openpose_json"):
     start = time.time()

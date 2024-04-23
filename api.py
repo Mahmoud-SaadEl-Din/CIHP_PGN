@@ -172,7 +172,7 @@ def classify_pose():
     clear_cache_poses()
     return jsonify({'text': f'{names},{prob}, {class_} poses'})
     
-
+# TODO : Make uuid unique id for each image
 # Define a route for handling image uploads
 @app.route('/upload_person', methods=['POST'])
 def upload_person():

@@ -14,7 +14,7 @@ from detectron2.data import MetadataCatalog
 setup_logger() #The logger is responsible for printing progress and error messages to the console during the training or inference process.
 # Load configuration and model weights
 cfg = get_cfg()
-cfg.MODEL.DEVICE = "cpu"
+cfg.MODEL.DEVICE = "cuda"
 model = 'keypoint_rcnn_R_50_FPN_3x'
 cfg.merge_from_file(model_zoo.get_config_file("COCO-Keypoints/" + model + ".yaml"))
 cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-Keypoints/" + model + ".yaml")

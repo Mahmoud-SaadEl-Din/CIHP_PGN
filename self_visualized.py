@@ -27,7 +27,7 @@ cfg = get_cfg()
 add_densepose_config(cfg)
 
 cfg.merge_from_file("densepose_rcnn_R_50_FPN_s1x.yaml")
-cfg.MODEL.DEVICE = "cpu"
+cfg.MODEL.DEVICE = "cuda"
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5
 
 cfg.MODEL.WEIGHTS = "densepose_rcnn_R_50_FPN_s1x.pkl"

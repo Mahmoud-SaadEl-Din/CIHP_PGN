@@ -7,7 +7,7 @@ from os.path import join
 from inf_pgn import *
 import time
 from infer_cloth_mask import *
-from get_parse_agnostic import get_im_parse_agnostic_original, get_img_agnostic_human,get_img_agnostic_human2, read_pose_parse, read_pose_parse_detectron2
+from get_parse_agnostic import get_im_parse_agnostic_original_for_leg, get_img_agnostic_human,get_img_agnostic_human2_for_leg,get_img_agnostic_human3_for_leg, read_pose_parse, read_pose_parse_detectron2
 import numpy as np
 from PIL import Image
 from self_visualized import infer_densepose
@@ -147,7 +147,7 @@ def route_for_button_2():
         if im_parse ==False:
             print(f"{im_name} ==> OpenPose Json file is not exist")
             continue
-        agnostic,agnostic_mask = get_im_parse_agnostic_original(im_parse, im_parse_np, pose_data)
+        agnostic,agnostic_mask = get_im_parse_agnostic_original_for_leg(im_parse, im_parse_np, pose_data)
         out_path = join(out_dir, parse_name)
         agnostic.save(out_path)
         with open(join(out_dir, parse_name_npy), 'wb') as f:
@@ -171,14 +171,13 @@ def route_for_button_3():
         if im_parse ==False:
             print(f"{im_name} ==> OpenPose Json file is not exist")
             continue
-        agnostic,binary = get_img_agnostic_human2(rgb_model, im_parse_np, pose_data)
+        agnostic,binary = get_img_agnostic_human3_for_leg(rgb_model, im_parse_np, pose_data)
         out_path = join(out_dir, im_name)
         agnostic.save(out_path)
-        print(type(binary))
         binary.save(f"datalake_folder/agnostic-mask/{im_name}")
         
-        send_to_diffusion2(join("datalake_folder", "agnostic-v3.2", im_name),"agnostic_gray")
-        send_to_diffusion2(join("datalake_folder", "agnostic-mask", im_name),"cloth_mask")
+        # send_to_diffusion2(join("datalake_folder", "agnostic-v3.2", im_name),"agnostic_gray")
+        # send_to_diffusion2(join("datalake_folder", "agnostic-mask", im_name),"cloth_mask")
         
     end = time.time()
     data = {
@@ -188,12 +187,12 @@ def route_for_button_3():
 
 @app.route('/route_for_button_4')
 def route_for_button_4():
-    in_dir = "/root/diffusion_root/CIHP_PGN/datalake_folder/image"
-    out_dir = "/root/diffusion_root/CIHP_PGN/datalake_folder/openpose_img"
-    json_dir = "/root/diffusion_root/CIHP_PGN/datalake_folder/openpose_json"
+    in_dir = "/media/HDD2/VITON/CIHP_PGN/datalake_folder/image"
+    out_dir = "/media/HDD2/VITON/CIHP_PGN/datalake_folder/openpose_img"
+    json_dir = "/media/HDD2/VITON/CIHP_PGN/datalake_folder/openpose_json"
     # exe_bin_file = "./build/examples/openpose/openpose.bin"
     start = time.time()
-    # os.chdir("/root/diffusion_root/CIHP_PGN/openpose")
+    # os.chdir("/media/HDD2/VITON/CIHP_PGN/openpose")
     # cmd_ = f"{exe_bin_file} --image_dir {in_dir} --disable_blending --write_images {out_dir} --hand --write_json {json_dir} --display 0 --net_resolution '64x64'"
     # success = os.system(cmd_)
     pose_dir(in_dir, out_dir, json_dir)
@@ -202,7 +201,7 @@ def route_for_button_4():
 		"text": f"processed {len(os.listdir(json_dir))} images in {round((end-start),2)} seconds"
 	}
     # if success ==0:
-    #     os.chdir("/root/diffusion_root/CIHP_PGN")
+    #     os.chdir("/media/HDD2/VITON/CIHP_PGN")
     #     data = {
 	# 		"text": f"processed {len(os.listdir(json_dir))} in {round((end-start),2)} seconds"
 	# 	}
@@ -215,8 +214,8 @@ def route_for_button_5():
     images_dir = "datalake_folder/image"
     out_dir = "datalake_folder/image-densepose"
     infer_densepose(images_dir,out_dir)
-    for image_name in os.listdir(out_dir):
-        send_to_diffusion2(join("datalake_folder", "image-densepose", image_name),"densepose")
+    # for image_name in os.listdir(out_dir):
+    #     send_to_diffusion2(join("datalake_folder", "image-densepose", image_name),"densepose")
     end = time.time()
     data = {
         "text": f"processed {len(os.listdir(out_dir))} images in {round((end-start),2)} seconds"
@@ -228,8 +227,8 @@ def route_for_button_6():
     # Fetch data for button 1 (replace this with your logic)
     start = time.time()
     count = infere_cloth_mask("datalake_folder/cloth","datalake_folder/cloth-mask")
-    for image_name in os.listdir("datalake_folder/cloth-mask"):
-        send_to_diffusion2(join("datalake_folder", "cloth-mask", image_name),"cloth_mask")
+    # for image_name in os.listdir("datalake_folder/cloth-mask"):
+    #     send_to_diffusion2(join("datalake_folder", "cloth-mask", image_name),"cloth_mask")
     #send_to_diffusion2(img_path, "cloth_mask")
     end = time.time()
     data = {
@@ -256,17 +255,17 @@ def route_for_button_8():
     start = time.time()
     infere_parser("datalake/image","datalake/image-parse-v3")
     ##############################################
-    in_dir = "/root/diffusion_root/CIHP_PGN/datalake/image"
-    out_dir = "/root/diffusion_root/CIHP_PGN/datalake/openpose_img"
-    json_dir = "/root/diffusion_root/CIHP_PGN/datalake/openpose_json"
+    in_dir = "/media/HDD2/VITON/CIHP_PGN/datalake/image"
+    out_dir = "/media/HDD2/VITON/CIHP_PGN/datalake/openpose_img"
+    json_dir = "/media/HDD2/VITON/CIHP_PGN/datalake/openpose_json"
     exe_bin_file = "./build/examples/openpose/openpose.bin"
-    os.chdir("/root/diffusion_root/CIHP_PGN/openpose")
+    os.chdir("/media/HDD2/VITON/CIHP_PGN/openpose")
     cmd_ = f"{exe_bin_file} --image_dir {in_dir} --disable_blending --write_images {out_dir} --hand --write_json {json_dir} --display 0 --net_resolution '64x64'"
     success = os.system(cmd_)
     if success == 1:
         print("true succss")
     #########################################
-    os.chdir("/root/diffusion_root/CIHP_PGN")
+    os.chdir("/media/HDD2/VITON/CIHP_PGN")
     f = open("name.txt", "r")
     im_name = f.read()
     print(im_name)
@@ -285,7 +284,7 @@ def route_for_button_8():
     ############################################
     infer_densepose("datalake/image","datalake/image-densepose")
     ############################################
-    img_path = infere_cloth_mask("/root/diffusion_root/CIHP_PGN/datalake/cloth","/root/diffusion_root/CIHP_PGN/datalake/cloth-mask")
+    img_path = infere_cloth_mask("/media/HDD2/VITON/CIHP_PGN/datalake/cloth","/media/HDD2/VITON/CIHP_PGN/datalake/cloth-mask")
     ############################################
     out_path = "datasets/HR_VITON_outs"
     infer_hr_viton("datalake",out_path,"pairs.txt")
@@ -366,8 +365,8 @@ def save_Refresh():
     os.makedirs(join(logged_dir, "HR_VITON"))
     os.makedirs(join(logged_dir, "STABLE_VITON"))
     from distutils.dir_util import copy_tree
-    copy_tree("/root/diffusion_root/CIHP_PGN/datasets/HR_VITON_group", join(logged_dir,"HR_VITON"))
-    copy_tree("/root/diffusion_root/CIHP_PGN/samples/unpair", join(logged_dir,"STABLE_VITON"))
+    copy_tree("/media/HDD2/VITON/CIHP_PGN/datasets/HR_VITON_group", join(logged_dir,"HR_VITON"))
+    copy_tree("/media/HDD2/VITON/CIHP_PGN/samples/unpair", join(logged_dir,"STABLE_VITON"))
     l = ["datasets/HR_VITON_group","samples/unpair", "test/test/classified_poses"]
     for name in l:     
         shutil.rmtree(name)
@@ -394,7 +393,7 @@ def upload_person():
         img = Image.open(join("datalake_folder", "image", image_name))
         img_resize = img.resize((w, h))
         img_resize.save(join("datalake_folder", "image", image_name))
-        send_to_diffusion2(join("datalake_folder", "image", image_name),"person")
+        # send_to_diffusion2(join("datalake_folder", "image", image_name),"person")
         c+=1
 
     return jsonify({'text': f'{c} Person images uploaded successfully'})
@@ -415,7 +414,7 @@ def upload_cloth():
         img = Image.open(join("datalake_folder", "cloth", image_name))
         img_resize = img.resize((w, h))
         img_resize.save(join("datalake_folder", "cloth", image_name))
-        send_to_diffusion2(join("datalake_folder", "cloth", image_name),"cloth")
+        # send_to_diffusion2(join("datalake_folder", "cloth", image_name),"cloth")
 
         c+=1
 

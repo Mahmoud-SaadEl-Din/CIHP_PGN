@@ -36,7 +36,11 @@ def pose_image(image_path):
     # v = v.draw_instance_predictions(outputs["instances"].to("cpu"))
     v = v.draw_and_connect_keypoints(keypoints[0])
     output_image = v.get_image()[:, :, ::-1]
-
+    for i, pnt in enumerate(keypoints[0]):
+        image = cv2.circle(image, (int(pnt[0]),int(pnt[1])), radius=1, color=(0, 0, 255), thickness=-1)
+        image = cv2.putText(image, f'{i}', (int(pnt[0])-5,int(pnt[1])-5),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,255,255), 1)
+        cv2.imwrite("key_points_detectron2.png", image)
     return keypoints, output_image
 
 
@@ -67,3 +71,6 @@ def draw():
         image = cv2.putText(image, f'{i}', (int(pnt[0])-5,int(pnt[1])-5),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.3, (255,255,255), 1)
         cv2.imwrite("key_points_detectron2.png", image)
+
+
+pose_image("/media/HDD2/VITON/CIHP_PGN/datalake_folder/image/2024-03-06_19-18-47_person6.png")

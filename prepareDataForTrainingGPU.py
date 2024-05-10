@@ -8,14 +8,14 @@ from self_visualized import infer_densepose
 def get_len(path):
     return len(os.listdir(path))
 
-def prerequiste(id):
+def prerequiste(id,root):
     # Fetch data for button 1 (replace this with your logic)
     start = time.time()
     #step #1
     page_index = id
     print(f"working with page {page_index}")
     # root = f"/dev/shm/LC_scraping/turkish/correct_scraping/downloads/page_{page_index}/paired"
-    root = f"/media/HDD2/VITON/SAM/LC/downloads/page_{page_index}/paired"
+    root = f"{root}/page_{page_index}/paired"
     
     
     in_ = join(root,"images")
@@ -61,8 +61,16 @@ def prerequiste(id):
     # shutil.rmtree(out_pose_json)
     
     
-    
-for i in range(1, 118):
-    prerequiste(i)
+ 
+categories = ["polo","vneck", "crew","shirts","pants","trousers","chino","jacket","vest","sweatshirt",
+                  "sweatpants","shorts","beachwear","sportswear","cardigans","jumpers","coats","pyjamas",
+                  "underwear","socks","boxer","undershirt","trainers","hats","bags"]
+
+for cat in categories:
+    root = f"/media/HDD2/VITON/LC_WIKI_data/men_egypt/{cat}/downloads"  
+    print("working with Category", cat, "with root" , root)  
+    if os.path.exists(root):
+        for i in range(1, len(os.listdir(root))+1):
+            prerequiste(i,root=root)
 
 # error in 2(warped = 0), 6(agnostic 150/317),  

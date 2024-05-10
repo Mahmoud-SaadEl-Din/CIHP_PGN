@@ -6,9 +6,9 @@ import time
 import requests
 import cv2
 import pandas as pd
-from get_parse_agnostic import get_im_parse_agnostic_original,get_img_agnostic_human2, read_pose_parse_detectron2
-from self_visualized import infer_densepose
-from keypoints_detectron2 import pose_dir
+from get_parse_agnostic import get_im_parse_agnostic_original,get_img_agnostic_human2, read_pose_parse_detectron2, get_img_agnostic_human3_for_leg
+# from self_visualized import infer_densepose
+# from keypoints_detectron2 import pose_dir
 import statsmodels.api as sm 
 from sklearn.model_selection import train_test_split
 
@@ -108,7 +108,7 @@ def gray_agnostic_pure(in_):
         if im_parse ==False:
             print(f"{im_name} ==> OpenPose Json file is not exist")
             continue
-        agnostic,binary = get_img_agnostic_human2(rgb_model, im_parse_np, pose_data)
+        agnostic,binary = get_img_agnostic_human3_for_leg(rgb_model, im_parse_np, pose_data)
         out_path = join(in_,"agnostic", im_name)
         agnostic.save(out_path)
         # print(type(binary))

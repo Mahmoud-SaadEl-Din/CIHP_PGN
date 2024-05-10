@@ -111,6 +111,34 @@ def get_img_agnostic_human(img, parse, pose_data):
     return agnostic
 
 
+def get_im_parse_agnostic_original_for_leg(im_parse,parse_array, pose_data):
+    # parseArray is 2D mask with classes index
+    w, h = im_parse.size
+
+    # 16, 17: Right/left leg
+    # 8,9,12: Socks, pants, skirt 
+    parse_leg = ((parse_array == 17).astype(np.float32) +
+                    (parse_array == 16).astype(np.float32)) 
+    parse_lower_cloth = ((parse_array == 8).astype(np.float32)+
+                        (parse_array == 9).astype(np.float32)+ 
+                        (parse_array == 12).astype(np.float32))
+
+    agnostic_mask = parse_array.copy()
+    agnostic_mask[parse_array==17] = 0
+    agnostic_mask[parse_array==16] = 0
+    agnostic_mask[parse_array==8] = 0
+    agnostic_mask[parse_array==9] = 0
+    agnostic_mask[parse_array==12] = 0
+
+    r = 10
+    agnostic = im_parse.copy()
+    # mask torso & neck
+    agnostic.paste(0, None, Image.fromarray(np.uint8(parse_leg * 255), 'L'))
+    agnostic.paste(0, None, Image.fromarray(np.uint8(parse_lower_cloth * 255), 'L'))
+
+    return agnostic,agnostic_mask
+
+
 def get_img_agnostic_human2(img, parse, pose_data, color=(128, 128, 128),color_mask=(255,255,255)):
     parse_array = parse
     parse_head = ((parse_array == 4).astype(np.float32) +
@@ -192,6 +220,100 @@ def get_img_agnostic_human2(img, parse, pose_data, color=(128, 128, 128),color_m
     agnostic.paste(img, None, Image.fromarray(np.uint8(parse_lower * 255), 'L'))
     binary_mask.paste(white_img, None, Image.fromarray(np.uint8(parse_head * 255), 'L'))
     binary_mask.paste(white_img, None, Image.fromarray(np.uint8(parse_lower * 255), 'L'))
+    return agnostic, binary_mask
+
+
+def get_img_agnostic_human2_for_leg(img, parse, pose_data, color=(128, 128, 128),color_mask=(255,255,255)):
+    parse_array = parse
+    # 16, 17: Right/left leg
+    # 8,9,12: Socks, pants, skirt 
+    w, h = img.size
+    
+    parse_upper = ((parse_array == 5).astype(np.float32) +
+                    (parse_array == 6).astype(np.float32) +
+                    (parse_array == 19).astype(np.float32) +
+                    (parse_array == 18).astype(np.float32) +
+                    (parse_array == 14).astype(np.float32) +
+                    (parse_array == 15).astype(np.float32) +
+                    (parse_array == 0).astype(np.float32) +
+                    (parse_array == 10).astype(np.float32) +
+                    (parse_array == 7).astype(np.float32))
+
+    agnostic = img.copy()
+    agnostic_draw = ImageDraw.Draw(agnostic)
+
+    # Create a binary mask to track filled areas with RGB channels
+    binary_mask = Image.new("RGB", img.size, (0, 0, 0))
+    white_img = Image.new("RGB", img.size, (0, 0, 0))
+
+    binary_mask_draw = ImageDraw.Draw(binary_mask)
+
+    # Leg points. Right Leg (12,14,16) . Left Leg (11,13,15)
+    beginning_of_lower = pose_data[12][1] - 50
+    
+    x,y = 0,beginning_of_lower
+    x1,y1 = w,h
+    agnostic_draw.rectangle(((x,y),(x1,y1)),color)
+    binary_mask_draw.rectangle(((x,y),(x1,y1)),color_mask)
+
+    
+    # print(pose_data[5])
+    # pairs = [[11,12],[11,13],[13,15],[12,14],[14,16]]
+    # for i,j in pairs:
+    #     shape = [tuple(pose_data[i]),tuple(pose_data[j])]
+    #     agnostic_draw.line(shape, color, width=140)
+    #     binary_mask_draw.line(shape, color_mask, width=140)
+
+    # Paste the original image based on masks
+    agnostic.paste(img, None, Image.fromarray(np.uint8(parse_upper * 255), 'L'))
+    binary_mask.paste(white_img, None, Image.fromarray(np.uint8(parse_upper * 255), 'L'))
+    return agnostic, binary_mask
+
+def get_img_agnostic_human3_for_leg(img, parse, pose_data, color=(128, 128, 128),color_mask=(255,255,255)):
+    parse_array = parse
+    # 16, 17: Right/left leg
+    # 8,9,12: Socks, pants, skirt 
+    w, h = img.size
+    
+    parse_upper = ((parse_array == 5).astype(np.float32) +
+                    (parse_array == 6).astype(np.float32) +
+                    (parse_array == 19).astype(np.float32) +
+                    (parse_array == 18).astype(np.float32) +
+                    (parse_array == 14).astype(np.float32) +
+                    (parse_array == 15).astype(np.float32) +
+                    (parse_array == 10).astype(np.float32) +
+                    (parse_array == 7).astype(np.float32))
+
+    agnostic = img.copy()
+    agnostic_draw = ImageDraw.Draw(agnostic)
+
+    # Create a binary mask to track filled areas with RGB channels
+    binary_mask = Image.new("RGB", img.size, (0, 0, 0))
+    white_img = Image.new("RGB", img.size, (0, 0, 0))
+
+    binary_mask_draw = ImageDraw.Draw(binary_mask)
+
+    # Leg points. Right Leg (12,14,16) . Left Leg (11,13,15)
+    
+    y1 = int(pose_data[12][1])
+    y2 = int(pose_data[15][1])
+    
+    pose_data[12][0] = pose_data[12][0] - 50
+    pose_data[12][1] = pose_data[12][1] - 50
+    pose_data[15][0] = pose_data[15][0] + 50
+    pose_data[15][1] = pose_data[15][1] + 50
+    if y1 > y2:
+        print('smaller')
+        pose_data[15][1] = h
+        
+    agnostic_draw.rectangle((tuple(pose_data[12]),tuple(pose_data[15])),color)
+    
+    binary_mask_draw.rectangle((tuple(pose_data[12]),tuple(pose_data[15])),color_mask)
+
+    
+    # Paste the original image based on masks
+    agnostic.paste(img, None, Image.fromarray(np.uint8(parse_upper * 255), 'L'))
+    binary_mask.paste(white_img, None, Image.fromarray(np.uint8(parse_upper * 255), 'L'))
     return agnostic, binary_mask
 
 

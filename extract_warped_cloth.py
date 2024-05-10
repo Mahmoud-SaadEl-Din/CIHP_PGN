@@ -4,12 +4,14 @@ import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
+# upper 5, lower 9
+
 def get_warped(in_,out_):
     for cls_arr in tqdm(glob.glob(f"{in_}/*.npy"), desc="Warped GT..."):
         with open(cls_arr, 'rb') as f:
             im_parse_np = np.load(f)
              # Create binary image
-            binary_image = (im_parse_np == 5).astype(np.uint8) * 255
+            binary_image = (im_parse_np == 9).astype(np.uint8) * 255
             
             # Convert to PIL Image
             binary_image_pil = Image.fromarray(binary_image)

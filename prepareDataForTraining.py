@@ -41,15 +41,15 @@ def prerequiste(id,root):
     os.makedirs(out_densepose,exist_ok=True)
     os.makedirs(out_cloth,exist_ok=True)
     
-    # if len(os.listdir(in_)) != len(os.listdir(out_warped)):
-    #     print("parser section.",len(os.listdir(in_)),len(os.listdir(out_warped)))
-    #     count = infere_parser(in_,out_)
-    #     get_warped(out_,out_warped)
+    if len(os.listdir(in_)) != len(os.listdir(out_warped)):
+        print("parser section.",len(os.listdir(in_)),len(os.listdir(out_warped)))
+        count = infere_parser(in_,out_)
+        get_warped(out_,out_warped)
     # # step 2
-    # if len(os.listdir(out_agnostic)) == 0:
+    if len(os.listdir(out_agnostic)) == 0:
     #     # detectron_poses(in_,out_pose,out_pose_json)
     #     #step 3
-    gray_agnostic_pure(root)
+        gray_agnostic_pure(root)
     # #step 4
     # if len(os.listdir(in_)) != len(os.listdir(out_densepose)):
     #     infer_densepose(in_,out_densepose)
@@ -69,10 +69,10 @@ def prerequiste(id,root):
 
 categories = ["pants","trousers","chino","sweatpants","shorts"]
 
-for cat in categories:
-    root = f"/media/HDD2/VITON/LC_WIKI_data/men_egypt/{cat}/downloads"  
+r = "/media/HDD2/VITON/LC_WIKI_data/men_turkey"
+for cat in os.listdir(r):
+    root = f"/media/HDD2/VITON/LC_WIKI_data/men_turkey/{cat}/downloads"  
     print("working with Category", cat, "with root" , root)  
-    if os.path.exists(root):
-        for i in range(1, len(os.listdir(root))+1):
-            prerequiste(i,root=root)
+    for i in range(1, len(os.listdir(root))+1):
+        prerequiste(i,root=root)
 # error in 2(warped = 0), 6(agnostic 150/317),  

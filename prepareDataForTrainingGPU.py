@@ -62,15 +62,15 @@ def prerequiste(id,root):
     
     
  
-categories = ["polo","vneck", "crew","shirts","pants","trousers","chino","jacket","vest","sweatshirt",
-                  "sweatpants","shorts","beachwear","sportswear","cardigans","jumpers","coats","pyjamas",
-                  "underwear","socks","boxer","undershirt","trainers","hats","bags"]
+# categories = ["polo","vneck", "crew","shirts","pants","trousers","chino","jacket","vest","sweatshirt",
+#                   "sweatpants","shorts","beachwear","sportswear","cardigans","jumpers","coats","pyjamas",
+#                   "underwear","socks","boxer","undershirt","trainers","hats","bags"]
 
-for cat in categories:
-    root = f"/media/HDD2/VITON/LC_WIKI_data/men_egypt/{cat}/downloads"  
+r = "/media/HDD2/VITON/LC_WIKI_data/men_turkey"
+for cat in os.listdir(r):
+    root = f"/media/HDD2/VITON/LC_WIKI_data/men_turkey/{cat}/downloads"  
     print("working with Category", cat, "with root" , root)  
-    if os.path.exists(root):
-        for i in range(1, len(os.listdir(root))+1):
-            prerequiste(i,root=root)
+    for i in range(1, len(os.listdir(root))+1):
+        prerequiste(i,root=root)
 
 # error in 2(warped = 0), 6(agnostic 150/317),  

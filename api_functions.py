@@ -7,8 +7,8 @@ import requests
 import cv2
 import pandas as pd
 from get_parse_agnostic import get_im_parse_agnostic_original,get_img_agnostic_human2, read_pose_parse_detectron2, get_img_agnostic_human3_for_leg
-# from self_visualized import infer_densepose
-# from keypoints_detectron2 import pose_dir
+from self_visualized import infer_densepose
+from keypoints_detectron2 import pose_dir
 import statsmodels.api as sm 
 from sklearn.model_selection import train_test_split
 

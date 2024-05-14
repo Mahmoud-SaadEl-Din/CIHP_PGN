@@ -19,6 +19,10 @@ def ask_server2_to_diffuse():
     return response
 
 
+# TODO: to be done later, multi-request and resources control 
+def run_prerequiste_in_bk(img_id):
+    requests.get(f"http://62.67.51.161:5903/prerequiste/{img_id}")
+
 def send_to_diffusion2(image_path, txt):
     # URL of the GPU server where you'll upload the image
     gpu_server_url = 'http://62.67.51.161:5000/upload'  # Replace with your GPU server's URL
@@ -75,8 +79,8 @@ def gray_agnostic(by_name="", send = False):
     # Fetch data for button 1 (replace this with your logic)
     start = time.time()
     if by_name != "":
-        send_to_diffusion2(join("/dev/MY_DB/", "agnostic-v3.2", by_name),"agnostic_gray")
-        send_to_diffusion2(join("/dev/MY_DB/", "agnostic-mask", by_name),"cloth_mask")
+        send_to_diffusion2(join("images_DB", "agnostic-v3.2", by_name),"agnostic_gray")
+        send_to_diffusion2(join("images_DB", "agnostic-mask", by_name),"cloth_mask")
         return
     images_dir = "datalake_folder/image"
     out_dir = join("datalake_folder","agnostic-v3.2")
@@ -129,7 +133,7 @@ def detectron_densepose(by_name="",send=False):
     # Fetch data for button 5 (replace this with your logic)
     start = time.time()
     if by_name != "":
-        send_to_diffusion2(join("/dev/MY_DB", "image-densepose", by_name),"densepose")
+        send_to_diffusion2(join("images_DB", "image-densepose", by_name),"densepose")
         return
     images_dir = "datalake_folder/image"
     out_dir = "datalake_folder/image-densepose"

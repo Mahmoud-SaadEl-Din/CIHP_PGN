@@ -18,12 +18,12 @@ def conditional_merge(im_rgb_diffused,im_rgb_originnal,im_parse=None):
 
 def take_face_from_original_to_diffusion(generated_image_name, original_img_name):
     
-    ori_img = cv2.imread(join("/dev/MY_DB/image", original_img_name))
+    ori_img = cv2.imread(join("images_DB/image", original_img_name))
     ori_img = cv2.resize(ori_img,(384,512))
-    diffused_img = cv2.imread(join("/dev/MY_DB/viton_results",generated_image_name))
-    with open(join("/dev/MY_DB/image-parse-v3", original_img_name.replace(".png","_vis2.npy")), 'rb') as f:
+    diffused_img = cv2.imread(join("images_DB/viton_results",generated_image_name))
+    with open(join("images_DB/image-parse-v3", original_img_name.replace(".png","_vis2.npy")), 'rb') as f:
         im_parse_np = np.load(f)
-    cv2.imwrite(join("/dev/MY_DB/viton_results",generated_image_name), conditional_merge(diffused_img,ori_img,im_parse_np))
+    cv2.imwrite(join("images_DB/viton_results",generated_image_name), conditional_merge(diffused_img,ori_img,im_parse_np))
     print(f'Stitched and saved: {generated_image_name}')
 
     

@@ -39,7 +39,7 @@ def create_server_connection(host_name, user_name, user_password):
         print("MySQL Database connection successful")
     except Error as err:
         print(f"Error: '{err}'")
-
+    
     return connection
 
 def create_db_connection(host_name, user_name, user_password, db_name):
@@ -279,7 +279,7 @@ def drop_all_tables():
 
 def setup_DB():
 
-    created = True
+    created = False
     if not created:
         DB = create_server_connection("localhost","root","Inno26489*")
         create_database(DB, my_queries["create"])
@@ -291,12 +291,12 @@ def setup_DB():
         execute_query(DB, create_vitons_table)
     return DB
 
-# conn = setup_DB()#create_db_connection("localhost","root","Inno26489*","VITON")#
+conn = setup_DB()#create_db_connection("localhost","root","Inno26489*","VITON")#
 # insert_rows(conn, table_name, columns, data)
 # DB = create_db_connection("localhost","root","Inno26489*","VITON")
-show_tables(images_table_name)
-show_tables(clothes_table_name)
-show_tables(vitons_table_name)
+# show_tables(images_table_name)
+# show_tables(clothes_table_name)
+# show_tables(vitons_table_name)
 # execute_query(DB, "DROP TABLE vitons")
 # execute_query(DB, create_vitons_table)
 

@@ -358,8 +358,8 @@ def read_pose_parse_detectron2(root_path, im_name):
      
 
     # load parsing image
-    parse_name = im_name.replace(ext, '_vis.png')
-    parse_name_npy = im_name.replace(ext, '_vis2.npy')
+    parse_name = im_name
+    parse_name_npy = im_name.replace(ext, '.npy')
     # print(parse_name, parse_name_npy, pose_data)
     im_parse = Image.open(osp.join(root_path, 'image-parse-v3', parse_name))
     with open(osp.join(root_path, 'image-parse-v3', parse_name_npy), 'rb') as f:

@@ -38,9 +38,10 @@ argp.add_argument('-o',
 
 args = argp.parse_args()
 
-def infere_parser(in_path="datalake_folder/image", out_="datalake_folder/image-parse-v3"):
+def infere_parser(root="datalake"):
     start = time.time()
-    base = in_path
+    base = join(root,"image")
+    out_ = join(root, "image-parse-v3")
     image_list_inp = []
     diff = list(set(os.listdir(base)) - set(os.listdir(out_)))
     print(f"remiaining {len(diff)} out of {len(os.listdir(base))}")
@@ -137,7 +138,7 @@ def infere_parser(in_path="datalake_folder/image", out_="datalake_folder/image-p
 
         t =parsing_[0, :, :, 0]
         try:
-            with open('{}/{}_vis2.npy'.format(out_dir, img_id), 'wb') as f:
+            with open('{}/{}.npy'.format(out_dir, img_id), 'wb') as f:
                 np.save(f, t)
         except:
             print(f"error at {img_id}")
@@ -148,7 +149,7 @@ def infere_parser(in_path="datalake_folder/image", out_="datalake_folder/image-p
 
         parsing_im = Image.fromarray(msk[0])
         parsing_im = parsing_im.convert('P')
-        parsing_im.save('{}/{}_vis.png'.format(out_dir, img_id))
+        parsing_im.save('{}/{}.png'.format(out_dir, img_id))
   
     
     coord.request_stop()

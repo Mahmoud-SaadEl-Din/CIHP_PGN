@@ -1,0 +1,107 @@
+[32m[05/16 07:03:06 d2.checkpoint.detection_checkpoint]: [0m[DetectionCheckpointer] Loading from https://dl.fbaipublicfiles.com/detectron2/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl ...
+ * Serving Flask app 'api'
+ * Debug mode: on
+/media/HDD2/VITON/anaconda/envs/human_parser/lib/python3.7/site-packages/torch/distributed/distributed_c10d.py:263: UserWarning: torch.distributed.reduce_op is deprecated, please use torch.distributed.ReduceOp instead
+  "torch.distributed.reduce_op is deprecated, please use "
+/media/HDD2/VITON/CIHP_PGN/api_functions.py:21: MonkeyPatchWarning: Monkey-patching ssl after ssl has already been imported may lead to errors, including RecursionError on Python 3.6. It may also silently lead to incorrect behaviour on Python 3.7. Please monkey-patch earlier. See https://github.com/gevent/gevent/issues/1016. Modules that had direct imports (NOT patched): ['urllib3.util (/media/HDD2/VITON/anaconda/envs/human_parser/lib/python3.7/site-packages/urllib3/util/__init__.py)', 'urllib3.util.ssl_ (/media/HDD2/VITON/anaconda/envs/human_parser/lib/python3.7/site-packages/urllib3/util/ssl_.py)']. 
+  monkey.patch_all()
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5903
+ * Running on http://62.67.51.161:5903
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+[32m[05/16 07:03:14 d2.checkpoint.detection_checkpoint]: [0m[DetectionCheckpointer] Loading from https://dl.fbaipublicfiles.com/detectron2/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl ...
+/media/HDD2/VITON/anaconda/envs/human_parser/lib/python3.7/site-packages/torch/distributed/distributed_c10d.py:263: UserWarning: torch.distributed.reduce_op is deprecated, please use torch.distributed.ReduceOp instead
+  "torch.distributed.reduce_op is deprecated, please use "
+/media/HDD2/VITON/CIHP_PGN/api_functions.py:21: MonkeyPatchWarning: Monkey-patching ssl after ssl has already been imported may lead to errors, including RecursionError on Python 3.6. It may also silently lead to incorrect behaviour on Python 3.7. Please monkey-patch earlier. See https://github.com/gevent/gevent/issues/1016. Modules that had direct imports (NOT patched): ['urllib3.util.ssl_ (/media/HDD2/VITON/anaconda/envs/human_parser/lib/python3.7/site-packages/urllib3/util/ssl_.py)', 'urllib3.util (/media/HDD2/VITON/anaconda/envs/human_parser/lib/python3.7/site-packages/urllib3/util/__init__.py)']. 
+  monkey.patch_all()
+ * Debugger is active!
+ * Debugger PIN: 746-639-558
+54.86.50.139 - - [16/May/2024 07:03:40] "POST /upload_cloth HTTP/1.1" 200 -
+167.248.133.39 - - [16/May/2024 13:41:53] "GET / HTTP/1.1" 200 -
+167.248.133.39 - - [16/May/2024 13:41:53] code 505, message Invalid HTTP version (2.0)
+167.248.133.39 - - [16/May/2024 13:41:53] "[35m[1mPRI * HTTP/2.0[0m" HTTPStatus.HTTP_VERSION_NOT_SUPPORTED -
+167.248.133.39 - - [16/May/2024 13:41:54] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+167.94.138.126 - - [16/May/2024 13:43:21] "GET / HTTP/1.1" 200 -
+167.94.138.126 - - [16/May/2024 13:43:21] code 505, message Invalid HTTP version (2.0)
+167.94.138.126 - - [16/May/2024 13:43:21] "[35m[1mPRI * HTTP/2.0[0m" HTTPStatus.HTTP_VERSION_NOT_SUPPORTED -
+167.94.138.126 - - [16/May/2024 13:43:22] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+in the function  ['shirt.png', '2024-05-16_07-03-40']
+work on keypoints poses..:   0%|          | 0/1 [00:00<?, ?it/s]/media/HDD2/VITON/anaconda/envs/human_parser/lib/python3.7/site-packages/torch/functional.py:504: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3190.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+work on keypoints poses..: 100%|██████████| 1/1 [00:02<00:00,  2.29s/it]work on keypoints poses..: 100%|██████████| 1/1 [00:02<00:00,  2.29s/it]
+54.86.50.139 - - [16/May/2024 14:35:30] "POST /upload_person HTTP/1.1" 200 -
+54.86.50.139 - - [16/May/2024 14:36:31] "POST /upload_cloth HTTP/1.1" 200 -
+in the function  ['2024-03-06_19-18-47_person5.png', '2024-05-16_14-35-27']
+in the function  ['shirt.png', '2024-05-16_14-36-31']
+densepose..:   0%|          | 0/1 [00:00<?, ?it/s]densepose..: 100%|██████████| 1/1 [00:02<00:00,  2.39s/it]densepose..: 100%|██████████| 1/1 [00:02<00:00,  2.39s/it]
+54.86.50.139 - - [16/May/2024 14:37:04] "GET /diffuse/12/9 HTTP/1.1" 200 -
+in the function  [12, 9, '2024-03-06_19-18-47_person5**shirt.png', '2024-05-16_14-37-02']
+Request sent to http://62.67.51.161:5000/run_SV/2024-05-16_14-37-02
+densepose..:   0%|          | 0/1 [00:00<?, ?it/s]densepose..: 100%|██████████| 1/1 [00:01<00:00,  1.62s/it]densepose..: 100%|██████████| 1/1 [00:01<00:00,  1.62s/it]
+54.86.50.139 - - [16/May/2024 14:40:44] "GET /diffuse/12/9 HTTP/1.1" 200 -
+ * Detected change in '/media/HDD2/VITON/CIHP_PGN/DB_manager_pandas.py', reloading
+in the function  [12, 9, '2024-03-06_19-18-47_person5**shirt.png', '2024-05-16_14-40-43']
+Request sent to http://62.67.51.161:5000/run_SV/2024-05-16_14-40-43
+[32m[05/16 21:58:09 d2.checkpoint.detection_checkpoint]: [0m[DetectionCheckpointer] Loading from https://dl.fbaipublicfiles.com/detectron2/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl ...
+ * Serving Flask app 'api'
+ * Debug mode: on
+/media/HDD2/VITON/anaconda/envs/human_parser/lib/python3.7/site-packages/torch/distributed/distributed_c10d.py:263: UserWarning: torch.distributed.reduce_op is deprecated, please use torch.distributed.ReduceOp instead
+  "torch.distributed.reduce_op is deprecated, please use "
+/media/HDD2/VITON/CIHP_PGN/api_functions.py:21: MonkeyPatchWarning: Monkey-patching ssl after ssl has already been imported may lead to errors, including RecursionError on Python 3.6. It may also silently lead to incorrect behaviour on Python 3.7. Please monkey-patch earlier. See https://github.com/gevent/gevent/issues/1016. Modules that had direct imports (NOT patched): ['urllib3.util (/media/HDD2/VITON/anaconda/envs/human_parser/lib/python3.7/site-packages/urllib3/util/__init__.py)', 'urllib3.util.ssl_ (/media/HDD2/VITON/anaconda/envs/human_parser/lib/python3.7/site-packages/urllib3/util/ssl_.py)']. 
+  monkey.patch_all()
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5903
+ * Running on http://62.67.51.161:5903
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+[32m[05/16 21:58:17 d2.checkpoint.detection_checkpoint]: [0m[DetectionCheckpointer] Loading from https://dl.fbaipublicfiles.com/detectron2/COCO-Keypoints/keypoint_rcnn_R_50_FPN_3x/137849621/model_final_a6e10b.pkl ...
+/media/HDD2/VITON/anaconda/envs/human_parser/lib/python3.7/site-packages/torch/distributed/distributed_c10d.py:263: UserWarning: torch.distributed.reduce_op is deprecated, please use torch.distributed.ReduceOp instead
+  "torch.distributed.reduce_op is deprecated, please use "
+/media/HDD2/VITON/CIHP_PGN/api_functions.py:21: MonkeyPatchWarning: Monkey-patching ssl after ssl has already been imported may lead to errors, including RecursionError on Python 3.6. It may also silently lead to incorrect behaviour on Python 3.7. Please monkey-patch earlier. See https://github.com/gevent/gevent/issues/1016. Modules that had direct imports (NOT patched): ['urllib3.util.ssl_ (/media/HDD2/VITON/anaconda/envs/human_parser/lib/python3.7/site-packages/urllib3/util/ssl_.py)', 'urllib3.util (/media/HDD2/VITON/anaconda/envs/human_parser/lib/python3.7/site-packages/urllib3/util/__init__.py)']. 
+  monkey.patch_all()
+ * Debugger is active!
+ * Debugger PIN: 746-639-558
+54.86.50.139 - - [16/May/2024 21:58:22] "GET /tryOnStatus/12 HTTP/1.1" 200 -
+54.86.50.139 - - [16/May/2024 21:58:24] "GET /tryOnStatus/12 HTTP/1.1" 200 -
+54.86.50.139 - - [16/May/2024 22:05:03] "GET /tryOnStatus/1 HTTP/1.1" 200 -
+54.86.50.139 - - [16/May/2024 22:05:11] "GET /tryOnStatus/10 HTTP/1.1" 200 -
+54.86.50.139 - - [16/May/2024 22:05:39] "[31m[1mGET /tryOnStatus/100 HTTP/1.1[0m" 400 -
+54.86.50.139 - - [16/May/2024 22:05:59] "GET /tryOnStatus/9 HTTP/1.1" 200 -
+54.86.50.139 - - [16/May/2024 22:06:05] "[31m[1mGET /tryOnStatus/15 HTTP/1.1[0m" 400 -
+54.86.50.139 - - [16/May/2024 22:06:12] "GET /tryOnStatus/5 HTTP/1.1" 200 -
+54.86.50.139 - - [16/May/2024 22:10:12] "GET /tryOnStatus/5 HTTP/1.1" 200 -
+54.86.50.139 - - [16/May/2024 22:10:13] "GET /tryOnStatus/5 HTTP/1.1" 200 -
+No image found with id: 100
+No image found with id: 15
+densepose..:   0%|          | 0/1 [00:00<?, ?it/s]/media/HDD2/VITON/anaconda/envs/human_parser/lib/python3.7/site-packages/torch/functional.py:504: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3190.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+densepose..: 100%|██████████| 1/1 [00:02<00:00,  2.61s/it]densepose..: 100%|██████████| 1/1 [00:02<00:00,  2.61s/it]
+54.86.50.139 - - [17/May/2024 08:55:57] "GET /diffuse/11/7 HTTP/1.1" 200 -
+54.86.50.139 - - [17/May/2024 08:56:09] "GET /tryOnStatus/1 HTTP/1.1" 200 -
+54.86.50.139 - - [17/May/2024 08:56:17] "GET /tryOnStatus/10 HTTP/1.1" 200 -
+167.94.146.56 - - [17/May/2024 10:45:25] code 400, message Bad request version ('À\x14À')
+167.94.146.56 - - [17/May/2024 10:45:25] "[35m[1m î  êTö½\Æjl¡Ô¤Qô9¯e¯áö<ËáäS!%Âh ¾­â!Oá¬t³NP]NÔ 6óï8æ5V &Ì¨Ì©À/À0À+À,ÀÀ	ÀÀ[0m" HTTPStatus.BAD_REQUEST -
+167.94.146.56 - - [17/May/2024 10:45:28] "GET / HTTP/1.1" 200 -
+167.94.146.56 - - [17/May/2024 10:45:31] "GET / HTTP/1.1" 200 -
+167.94.146.56 - - [17/May/2024 10:45:31] code 505, message Invalid HTTP version (2.0)
+167.94.146.56 - - [17/May/2024 10:45:31] "[35m[1mPRI * HTTP/2.0[0m" HTTPStatus.HTTP_VERSION_NOT_SUPPORTED -
+167.94.146.56 - - [17/May/2024 10:45:31] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+167.94.146.48 - - [17/May/2024 15:21:48] code 400, message Bad request version ('À\x14À')
+167.94.146.48 - - [17/May/2024 15:21:48] "[35m[1m î  êµ2?!cóïµ3+¨äÀ÷ê»CyÓÁw.ªù ÕÕ=l,¼÷ªóÉûØÆb6keù£ÌÆ4a &Ì¨Ì©À/À0À+À,ÀÀ	ÀÀ[0m" HTTPStatus.BAD_REQUEST -
+167.94.146.48 - - [17/May/2024 15:21:52] "GET / HTTP/1.1" 200 -
+167.94.146.48 - - [17/May/2024 15:21:56] "GET / HTTP/1.1" 200 -
+167.94.146.48 - - [17/May/2024 15:21:56] code 505, message Invalid HTTP version (2.0)
+167.94.146.48 - - [17/May/2024 15:21:56] "[35m[1mPRI * HTTP/2.0[0m" HTTPStatus.HTTP_VERSION_NOT_SUPPORTED -
+167.94.146.48 - - [17/May/2024 15:21:56] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+107.170.240.17 - - [18/May/2024 03:18:40] code 400, message Bad request syntax ('MGLNDD_62.67.51.161_5903')
+107.170.240.17 - - [18/May/2024 03:18:40] "[35m[1mMGLNDD_62.67.51.161_5903[0m" HTTPStatus.BAD_REQUEST -
+167.94.138.57 - - [18/May/2024 11:25:18] code 400, message Bad request version ('À\x14À')
+167.94.138.57 - - [18/May/2024 11:25:18] "[35m[1m î  ê/rÈ¾Øá»Ànx?I-ÕNÑú)KjíÚ/ò° 	PTfÅÓâÁý;ª£cd¥¡£â¡iG Gn &Ì¨Ì©À/À0À+À,ÀÀ	ÀÀ[0m" HTTPStatus.BAD_REQUEST -
+167.94.138.57 - - [18/May/2024 11:25:21] "GET / HTTP/1.1" 200 -
+167.94.138.57 - - [18/May/2024 11:25:24] "GET / HTTP/1.1" 200 -
+167.94.138.57 - - [18/May/2024 11:25:24] code 505, message Invalid HTTP version (2.0)
+167.94.138.57 - - [18/May/2024 11:25:24] "[35m[1mPRI * HTTP/2.0[0m" HTTPStatus.HTTP_VERSION_NOT_SUPPORTED -
+167.94.138.57 - - [18/May/2024 11:25:25] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -

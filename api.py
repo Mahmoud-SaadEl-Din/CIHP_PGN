@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from inf_pgn import infere_parser
 import shutil
 import cv2
-from os.path import join
+from os.path import join, exists
 import time
 from flask import send_from_directory
 
@@ -25,13 +25,16 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 db = DB()
 
 
-def save_to_DB_all_prerequesite():
-    out_paths = ["image-parse-v3","openpose_img","openpose_json","agnostic-v3.2","agnostic-mask","image-densepose","cloth"]
+def prepare_folder_for_prerequisite(root):
+    # 8 folders needed
+    out_paths = ["agnostic-mask","agnostic-v3.2","cloth","image","image-densepose","image-parse-v3","openpose_img","openpose_json","TryOn"]
     for folder in out_paths:
-        copy_tree(f"datalake_folder/{folder}", f"images_DB/{folder}")
-        shutil.rmtree(f"datalake_folder/{folder}")
-        os.mkdir(f"datalake_folder/{folder}")
-    
+        os.mkdir(f"{root}/{folder}")
+
+def save_to_DB_all_prerequesite(root):
+    out_paths = ["image-parse-v3","agnostic-v3.2","agnostic-mask","image-densepose"]
+    for folder in out_paths:
+        copy_tree(f"{root}/{folder}", f"images_DB/{folder}")
     
 
 def allowed_file(filename):
@@ -39,9 +42,9 @@ def allowed_file(filename):
 
 
 
-@app.route('/serve_images/<path:filename>')
+@app.route('/TryOn/<path:filename>')
 def serve_images(filename):
-    return send_from_directory('images_DB/viton_results', filename)
+    return send_from_directory('images_DB/TryOn', filename)
 
 @app.route('/serve_images_stable/<path:filename>')
 def serve_images_stable(filename):
@@ -81,59 +84,94 @@ def index():
 def index_bulk():
     return render_template('index_bulk.html')
 
+@app.route('/tryOnStatus/<int:viton_id>')
+def DiffusionStatus(viton_id):
+    req_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    response = {"request_time":req_time}
+    status_code = 200
+    s = ""
+    response["tryon_path"] = s
+    try:   
+        # Fetch data for button 1 (replace this with your logic)
+        v_name, old_req_time = db.get_viton_name_by_id(viton_id)
+        # Convert the strings back to datetime objects
+        datetime_format = '%Y-%m-%d_%H-%M-%S'
+        time1 = datetime.strptime(old_req_time, datetime_format)
+        time2 = datetime.strptime(req_time, datetime_format)
+
+        # Calculate the difference
+        time_difference = time2 - time1
+
+        # Get the difference in minutes
+        difference_in_minutes = time_difference.total_seconds() // 60
+
+        print()
+        
+        msg = "Still in progress! Process take time. Please try again later"
+        if exists(join("images_DB", "TryOn", v_name)):
+            s = v_name
+            msg = f"Success! {v_name} are now on diffused. You can check the result from the link"
+            response["access_image"] = f"http://62.67.51.161:5903/TryOn/{v_name}"
+            response["tryon_path"] = s
+        response["message"] = msg
+        response["id"] = str(viton_id)
+        response["remaining_time"] = f"time passed {difference_in_minutes} minutes. please wait for another {15-difference_in_minutes} minutes"
+    except Exception as e:
+        status_code = 400
+        response["error"] = str(e)
+
+    return make_response(jsonify(response), status_code)
+
 
 
 @app.route('/diffuse/<int:person_id>/<int:cloth_id>')
-def your_route_handler(person_id, cloth_id):
-    # Your route handling logic here
-    p_name, c_name = db.get_image_name_by_id(person_id), db.get_cloth_name_by_id(cloth_id)
-    if p_name != None:
-        send_to_diffusion2(join("images_DB", "image", p_name),"person")
-        #send data to server 2
-        gray_agnostic(by_name=p_name,send=True)
+def Diffusion(person_id, cloth_id):
+    req_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    response = {"request_time":req_time}
+    status_code = 200
+    try:
+        base = "/media/HDD2/VITON/StableVITON_git/StableVITON/test"
+        current_diffuse_dir = join(base, req_time)
+        os.makedirs(current_diffuse_dir)
+        prepare_folder_for_prerequisite(current_diffuse_dir)
+        
+        # Fetch data for button 1 (replace this with your logic)
+        p_name, c_name = db.get_image_name_by_id(person_id),db.get_cloth_name_by_id(cloth_id)
+
+        # TODO: check if the ids exist if not, then skip
+
+        shutil.copy(join("images_DB", "image", p_name), join(current_diffuse_dir,"image",p_name))
+        shutil.copy(join("images_DB", "cloth", c_name), join(current_diffuse_dir,"cloth",c_name))
+        shutil.copy(join("images_DB", "openpose_img", p_name), join(current_diffuse_dir,"openpose_img",p_name))
+        shutil.copy(join("images_DB", "openpose_json", p_name), join(current_diffuse_dir,"openpose_json",p_name.replace(".png",".npy")))
+        
+        #step #1
+        if exists(join("images_DB", "image-parse-v3", p_name)):
+            shutil.copy(join("images_DB", "image-parse-v3", p_name), join(current_diffuse_dir,"image-parse-v3",p_name))
+            shutil.copy(join("images_DB", "image-parse-v3", p_name.replace(".png",".npy")), join(current_diffuse_dir,"image-parse-v3",p_name.replace(".png",".npy")))
+        else:
+            infere_parser(root=current_diffuse_dir)
+        # # step 2
+        # detectron_poses(root= current_diffuse_dir)
+        #step 3
+        gray_agnostic(root=current_diffuse_dir)
         #step 4
-        detectron_densepose(by_name=p_name,send=True)
-    if c_name !=None:
-        # send cloth to server 2
-        send_to_diffusion2(join("images_DB", "cloth", c_name),"cloth")
-    
-    #send request to server 2 to work on them
-    ask_server2_to_diffuse()
+        detectron_densepose(root=current_diffuse_dir)
+        #step 5
+        save_to_DB_all_prerequesite(root=current_diffuse_dir)
 
-    data = {
-        "text": f"Working with IDs",
-    }
-    print(data)
-    return jsonify(data)
+        #send request to server 2 to work on them
+        ask_server2_to_diffuse(req_time)
+        viton_path = f"{p_name[:-4]}**{c_name[:-4]}.png"
+        db_id = db.add_row("vitons",[person_id,cloth_id,viton_path,req_time])
+        response["message"] = f"Success! person id: {person_id} with cloth id: {cloth_id} are now on diffuse process this will take time. Please check later"
+        response["check_code"] = f"{p_name[:-4]}**{c_name[:-4]}.png"
+        response["id"] = str(db_id)
+    except Exception as e:
+        status_code = 400
+        response["error"] = str(e)
 
-
-@app.route('/prerequiste/<int:person_id>')
-def prerequiste(person_id):
-    # Fetch data for button 1 (replace this with your logic)
-    p_name = db.get_image_name_by_id(person_id)
-    clear_all()
-    shutil.copy(join("images_DB", "image", p_name), join("datalake_folder","image",p_name))
-    start = time.time()
-    #step #1
-    count = infere_parser()
-    # # step 2
-    detectron_poses()
-    #step 3
-    gray_agnostic()
-    #step 4
-    detectron_densepose()
-    #step 5
-    save_to_DB_all_prerequesite()
-    clear_all()
-
-    end = time.time()
-    print(count)
-    data = {
-        "text": f"processed {count} images in {round((end-start),2)} seconds",
-    }
-    print(data)
-    return jsonify(data)
-
+    return make_response(jsonify(response), status_code)
 
 @app.route('/get_all_stable_images')
 def get_all__stable_images():
@@ -143,34 +181,7 @@ def get_all__stable_images():
     image_folder = 'images_DB/viton_results'  # Change this to your actual image folder path
     image_paths = [f'images_DB/viton_results/{img}' for img in os.listdir(image_folder)]
     print("recieved the request with images", image_paths)
-    return jsonify({'imagePaths': image_paths})
-
-
-# Define a route for handling image uploads
-@app.route('/classify_pose', methods=['POST'])
-def classify_pose():
-    uploaded_files = request.files.getlist('person_images')
-    print(uploaded_files)
-    images = []
-    clear_cache_poses()
-    # Process the uploaded files (you can loop through the files and handle them as needed)
-    for file in uploaded_files:
-        # Save or process each file
-        image_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')+ "_" +file.filename.split("/")[-1]
-        png_name = ''.join(image_name.split(".")[:-1]) + ".png"
-
-        p1 = join('temp_poses/imgs', png_name)
-        file.save(p1)
-        img = cv2.imread(p1)
-        # img = cv2.resize(img,(384,512))
-        cv2.imwrite(p1,img)
-    
-    detectron_poses('temp_poses/imgs','temp_poses/poses_imgs','temp_poses/poses_json')
-    
-    names, prob, class_ = poses_classification_with_sm()
-    clear_cache_poses()
-    return jsonify({'text': f'{names},{prob}, {class_} poses'})
-    
+    return jsonify({'imagePaths': image_paths})    
 
 # Define a route for handling image uploads
 @app.route('/upload_person', methods=['POST'])
@@ -180,9 +191,9 @@ def upload_person():
     status_code = 200
     try:
         curr_request_dir = join("recieved_images", req_time)
-        persons_dir = join(curr_request_dir, "imgs")
-        poses_dir = join(curr_request_dir, "poses_imgs")
-        poses_json = join(curr_request_dir,"poses_json")
+        persons_dir = join(curr_request_dir, "image")
+        poses_dir = join(curr_request_dir, "openpose_img")
+        poses_json = join(curr_request_dir,"openpose_json")
         bad_poses_collection_dir = join("app_bad_poses", req_time)
         
         os.makedirs(curr_request_dir);os.mkdir(persons_dir);os.mkdir(poses_dir);os.mkdir(poses_json);os.makedirs(bad_poses_collection_dir)
@@ -197,35 +208,34 @@ def upload_person():
             file.save(p1)
             cv2.imwrite(p1,cv2.resize(cv2.imread(p1),(384,512)))
 
-        detectron_poses(persons_dir,poses_dir,poses_json)    
+        detectron_poses(root=curr_request_dir)    
         names, prob, class_ = poses_classification_with_sm(root=curr_request_dir)
         response = {"accepted_poses":[], "failed_poses":[], "request_time":req_time}
         for i, prob_ in enumerate(prob):
             if prob_ < 0.5:
                 # save the image as bad example
                 shutil.move(join(persons_dir,names[i]), join(bad_poses_collection_dir,names[i]))
-                os.remove(poses_dir,names[i])
-                os.remove(poses_json,names[i])
-                item_dict = {"image_name": names[i], "class":"bad_pose", "probability":prob_,
-                            "db_id": db_id}
+                os.remove(join(poses_dir,names[i]))
+                os.remove(join(poses_json,names[i].replace(".png",".npy")))
+                item_dict = {"image_name": names[i], "class":"bad_pose", "probability":prob_}
                 response["failed_poses"].append(item_dict)
             else:
                 # add to database the person. return the id.
                 shutil.move(join(persons_dir,names[i]), join("images_DB/image", names[i]))
                 shutil.move(join(poses_dir,names[i]), join("images_DB/openpose_img", names[i]))
-                shutil.move(join(poses_json,names[i]), join("images_DB/openpose_json", names[i]))
+                shutil.move(join(poses_json,names[i].replace(".png",".npy")), join("images_DB/openpose_json", names[i]))
                 db_id = db.add_row("persons",[png_name,req_time])
-                item_dict = {"image_name": names[i], "class":"good_pose", "probability":prob_, 
-                            "db_id": db_id}
+                item_dict = {"image_name": names[i], "class":"good_pose", "probability":str(prob_), 
+                            "db_id": str(db_id)}
                 response["accepted_poses"].append(item_dict)
-                
+        
+        shutil.rmtree(curr_request_dir)
     except Exception as e:
         status_code = 400
-        response["error"] = e
+        response["error"] = str(e)
     
     return make_response(jsonify(response), status_code)
         
-
 # Define a route for handling image uploads
 @app.route('/upload_cloth', methods=['POST'])
 def upload_cloth():
@@ -245,11 +255,11 @@ def upload_cloth():
             cv2.imwrite(p2,cv2.resize(cv2.imread(p2),(384,512)))
                 
             db_id = db.add_row("cloth",[png_name,req_time])
-            item_dict = {"cloth_name":image_name, "db_id": db_id}
+            item_dict = {"cloth_name":image_name, "db_id": str(db_id)}
             response["clothes"].append(item_dict)
     except Exception as e:
         status_code = 400
-        response["error"] = e
+        response["error"] = str(e)
         
     return make_response(jsonify(response),status_code)
 

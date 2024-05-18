@@ -135,6 +135,15 @@ class DB:
         else:
             print(f"No image found with id: {image_id}")
             return None
+        
+    def get_viton_name_by_id(self, viton_id):
+        """Get img_path by image_id."""
+        filtered_df = self.vitons_df[self.vitons_df['id'] == viton_id]
+        if not filtered_df.empty:
+            return filtered_df['viton_path'].iloc[0], filtered_df['register_time'].iloc[0]
+        else:
+            print(f"No image found with id: {viton_id}")
+            return None
 
 
 # Example usage:
